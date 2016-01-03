@@ -1,0 +1,47 @@
+{
+  "name": "appkr/fractal",
+  "description": "Fractal Wrapper for Laravel 5",
+  "keywords": [
+    "laravel",
+    "api",
+    "fractal"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Appkr",
+      "email": "juwonkim@me.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.9",
+    "league/fractal": "0.13.*"
+  },
+  "require-dev": {
+    "fzaninotto/faker": "1.5.*",
+    "phpunit/phpunit": "^5.1",
+    "illuminate/console": "~5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Appkr\\Fractal\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\": "tests/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.6-dev"
+    }
+  },
+  "suggest": {
+    "barryvdh/laravel-cors": "Handle CORS issue",
+    "tymon/jwt-auth": "Protect your API with JSON Web Tokens"
+  }
+}

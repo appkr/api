@@ -1,0 +1,28 @@
+
+    /**
+     * Include {{include.relationship}}.
+     *
+     * @param \{{subject.model}} ${{subject.object}}
+     * @param \League\Fractal\ParamBag
+     * @return \League\Fractal\Resource\Item
+     * @throws \Exception
+     */
+    public function {{include.method}}({{subject.basename}} ${{subject.object}}, ParamBag $params)
+    {
+        $usedParams = array_keys(iterator_to_array($params));
+
+        if ($invalidParams = array_diff($usedParams, $this->validParams)) {
+            throw new \Exception(sprintf('Invalid param(s): "%s". Valid param(s): "%s"', implode(',', $usedParams), implode(',', $this->validParams)));
+        }
+
+        list($limit, $offset) = $params->get('limit') ?: [5,1];
+        list($orderCol, $orderBy) = $params->get('order') ?: ['created_at', 'desc'];
+
+        ${{include.relationship}} = ${{subject.object}}->{{include.relationship}}
+            ->take($limit)
+            ->skip($offset)
+            ->orderBy($orderCol, $orderBy)
+            ->get();
+
+        return $this->collection(${{include.relationship}}, new {{include.transformer}});
+    }

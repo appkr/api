@@ -1,0 +1,21 @@
+    /**
+     * List of resources possible to include using url query string.
+     * e.g. collection case -> ?include=comments:limit(5|1):order(created_at|desc)
+     *      item case       -> ?include=author
+     *
+     * @var array
+     */
+    protected $availableIncludes = [{{include.value}}];
+
+    /**
+     * List of resources to include automatically/always.
+     *
+     * @var array
+     */
+    protected $defaultIncludes = [{{include.value}}];
+
+    /**
+     * List of extra parameters when including other resources.
+     * This is only applicable when including a collection.
+     */
+    private $validParams = ['limit', 'order'];

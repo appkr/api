@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Transformers;
+
+use {{subject.model}};
+use League\Fractal;
+use League\Fractal\ParamBag;
+use League\Fractal\TransformerAbstract;
+
+class {{subject.transformer}} extends TransformerAbstract
+{
+{{include.property}}
+    /**
+     * Transform single resource.
+     *
+     * @param \{{subject.model}} ${{subject.object}}
+     * @return array
+     */
+    public function transform({{subject.basename}} ${{subject.object}})
+    {
+        return [
+            'id' => (int) ${{subject.object}}->id,
+            // ...
+            'created' => ${{subject.object}}->created_at->toIso8601String(),
+            'link' => [
+                 'rel' => 'self',
+                 'href' => route('{{subject.route}}', ${{subject.object}}->id),
+            ],
+        ];
+    }
+{{include.methods}}
+}
