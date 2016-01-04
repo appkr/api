@@ -48,14 +48,9 @@ class AuthorTransformer extends TransformerAbstract
      * @return \League\Fractal\Resource\Collection|null
      * @throws \Exception
      */
-    public function includeBooks(Author $author, $params = null)
+    public function includeBooks(Author $author, ParamBag $params = null)
     {
-        if ($params) {
-            $this->validateParams($params);
-        }
-
-        list($limit, $offset) = $params['limit'] ?: config('api.include.limit');
-        list($orderCol, $orderBy) = $params['order'] ?: config('api.include.order');
+        list($limit, $offset, $orderCol, $orderBy) = $this->calculateParams($params);
 
         $books = $author->books()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
 

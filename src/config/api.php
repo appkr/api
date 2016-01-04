@@ -34,12 +34,21 @@ return [
     | e.g. /books?include=author,publisher.somethingelse
     |
     */
+    // 'include' => [
+    //     'key' => 'include',
+    //     'params' => ['limit', 'order'],
+    //     'limit' => [3, 0], // default limit
+    //     'order' => ['created_at', 'desc'], // default order
+    // ],
+
     'include' => [
         'key' => 'include',
-        'params' => ['limit', 'order'],
-        'limit' => [3, 0], // default limit
-        'order' => ['created_at', 'desc'], // default order
+        'params' => [ // available modifier params and their default value
+            'limit' => [3, 0],
+            'order' => ['created_at', 'desc'],
+        ],
     ],
+
 
     /*
     |--------------------------------------------------------------------------

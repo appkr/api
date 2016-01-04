@@ -4,7 +4,6 @@ namespace {{ config('api.transformer.namespace') }};
 
 use {{ $subject->model }};
 use Appkr\Api\TransformerAbstract;
-use League\Fractal;
 use League\Fractal\ParamBag;
 
 class {{ $subject->transformer }} extends TransformerAbstract

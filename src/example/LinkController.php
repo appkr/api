@@ -21,7 +21,7 @@ class LinkController extends Controller
         ];
 
         return $response->setMeta([
-            'message'       => "Hello, I'm a appkr/fractal example api",
+            'message'       => "Hello, I'm a appkr/api example",
             'version'       => 1,
             'documentation' => route('v1.doc'),
         ])

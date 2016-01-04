@@ -3,6 +3,7 @@
 namespace Appkr\Api\Example;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Teapot\StatusCode\All as StatusCode;
 
 class BookApiTestForLumen extends \TestCase
 {
@@ -53,7 +54,7 @@ class BookApiTestForLumen extends \TestCase
     public function it_fetches_a_collection_of_books()
     {
         $this->get('v1/books', $this->getHeaders())
-            ->seeStatusCode(200)
+            ->seeStatusCode(StatusCode::OK)
             ->seeJson();
     }
 
@@ -61,12 +62,12 @@ class BookApiTestForLumen extends \TestCase
     public function it_fetches_a_instance_of_book()
     {
         $this->get('v1/books/' . $this->books['id'], $this->getHeaders())
-            ->seeStatusCode(200)
+            ->seeStatusCode(StatusCode::OK)
             ->seeJson();
     }
 
     /** @test */
-    public function it_responds_404_if_requested_book_is_not_found()
+    public function it_throws_exception_if_requested_book_is_not_found()
     {
         $this->get('v1/books/100000', $this->getHeaders())
             ->getExpectedException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
@@ -82,7 +83,7 @@ class BookApiTestForLumen extends \TestCase
         ];
 
         $this->post('v1/books', $payload, $this->getHeaders())
-            ->seeStatusCode(422)
+            ->seeStatusCode(StatusCode::UNPROCESSABLE_ENTITY)
             ->seeJson();
     }
 
@@ -98,7 +99,7 @@ class BookApiTestForLumen extends \TestCase
         $this->actingAs($this->author)
             ->post('v1/books', $payload, $this->getHeaders())
             ->seeInDatabase('books', ['title' => 'new title'])
-            ->seeStatusCode(201)
+            ->seeStatusCode(StatusCode::CREATED)
             ->seeJsonContains(['title' => 'new title']);
     }
 
@@ -112,7 +113,7 @@ class BookApiTestForLumen extends \TestCase
                 $this->getHeaders()
             )
             ->seeInDatabase('books', ['title' => 'MODIFIED title'])
-            ->seeStatusCode(200)
+            ->seeStatusCode(StatusCode::OK)
             ->seeJson();
     }
 
@@ -126,7 +127,7 @@ class BookApiTestForLumen extends \TestCase
                 $this->getHeaders()
             )
             ->notSeeInDatabase('books', ['id' => $this->books['id']])
-            ->seeStatusCode(200)
+            ->seeStatusCode(StatusCode::OK)
             ->seeJson();
     }
 

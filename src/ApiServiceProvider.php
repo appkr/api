@@ -36,6 +36,8 @@ class ApiServiceProvider extends ServiceProvider
             $fractal->setSerializer(app($config->get('api.serializer')));
 
             if ($includes = $app['request']->input($config->get('api.include.key'))) {
+                // Todo: merge passed include with default value here, if possible.
+                // Modifier regex /([\w]+)(\(([^\)]+)\))?/
                 $fractal->parseIncludes($includes);
             }
 

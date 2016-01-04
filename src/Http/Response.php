@@ -12,7 +12,7 @@ use League\Fractal\Resource\Item as FractalItem;
 use League\Fractal\Resource\Collection as FractalCollection;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use League\Fractal\Serializer\JsonApiSerializer;
-use Teapot\StatusCode;
+use Teapot\StatusCode\All as StatusCode;
 
 class Response
 {
@@ -396,7 +396,7 @@ class Response
     public function unprocessableError($message = 'Unprocessable Entity')
     {
         // Todo: StatusCode::UNPROCESSABLE_ENTITY is not implemented
-        return $this->setStatusCode(422)->error($message);
+        return $this->setStatusCode(StatusCode::UNPROCESSABLE_ENTITY)->error($message);
     }
 
     /**
