@@ -1,6 +1,6 @@
 <?php
 
-namespace Appkr\Fractal\Http;
+namespace Appkr\Api\Http;
 
 class ResponseFactory
 {

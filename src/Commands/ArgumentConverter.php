@@ -1,27 +1,29 @@
 <?php
 
-namespace Appkr\Fractal\Commands;
+namespace Appkr\Api\Commands;
 
 class ArgumentConverter
 {
     /**
-     * String calculation based on the command line argument.
-     * e.g. App\Book
+     * String calculation based on the given string which is a command line argument.
+     * e.g. App\\Book
      *
      * @param  string $subject
-     * @return array
+     * @return \stdClass
      */
     public function convert($subject)
     {
         $fqcn = starts_with('\\', $subject) ? $subject : '\\' . $subject;
 
-        return [
-            'fqcn' => $fqcn,
-            'model' => ltrim($fqcn, '\\'),
-            'basename' => class_basename($fqcn),
-            'object' => str_singular(strtolower(class_basename($fqcn))),
-            'transformer' => ucfirst(class_basename($fqcn)) . 'Transformer',
-            'route' => str_plural(strtolower(class_basename($fqcn))) . '.show',
-        ];
+        $obj = new \stdClass;
+
+        $obj->fqcn = $fqcn;
+        $obj->model = ltrim($fqcn, '\\');
+        $obj->basename = class_basename($fqcn);
+        $obj->object = str_singular(strtolower($obj->basename));
+        $obj->transformer = ucfirst($obj->basename) . 'Transformer';
+        $obj->route = 'api.v1.' . str_plural(strtolower($obj->basename)) . '.show';
+
+        return $obj;
     }
 }

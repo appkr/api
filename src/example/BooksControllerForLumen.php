@@ -1,31 +1,28 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+/**
+ * Lumen doesn't have FormRequest feature.
+ * That's the only reason why we separated Laravel and Lumen controller.
+ */
+
+namespace Appkr\Api\Example;
 
 use App\Http\Controllers\Controller;
-use Appkr\Fractal\Http\Response;
 use Illuminate\Http\Request;
 
-class ThingsControllerForLumen extends Controller
+class BooksControllerForLumen extends Controller
 {
     /**
-     * @var \Appkr\Fractal\Example\Thing
+     * @var \Appkr\Api\Example\Book
      */
     private $model;
 
     /**
-     * @var \Appkr\Fractal\Http\Response
+     * @param \Appkr\Api\Example\Book $model
      */
-    private $respond;
-
-    /**
-     * @param \Appkr\Fractal\Example\Thing $model
-     * @param \Appkr\Fractal\Http\Response $respond
-     */
-    public function __construct(Thing $model, Response $respond)
+    public function __construct(Book $model)
     {
-        $this->model   = $model;
-        $this->respond = $respond;
+        $this->model = $model;
     }
 
     /**
@@ -36,15 +33,15 @@ class ThingsControllerForLumen extends Controller
     public function index()
     {
         // Respond with pagination
-        return $this->respond->setMeta(['version' => 1])->withPagination(
-            $this->model->with('author')->latest()->paginate(25),
-            new ThingTransformer
+        return json()->setMeta(['version' => 1])->withPagination(
+            $this->model->with('author')->latest()->paginate(5),
+            new BookTransformer
         );
 
         // Respond as a collection
-        //return $this->respond->setMeta(['version' => 1])->withCollection(
+        //return json()->setMeta(['version' => 1])->withCollection(
         //    $this->model->with('author')->latest()->get(),
-        //    new ThingTransformer
+        //    new BookTransformer
         //);
     }
 
@@ -58,28 +55,28 @@ class ThingsControllerForLumen extends Controller
     {
         $this->validate($request, [
             'title'       => 'required|min:2',
-            'description' => 'min:2'
+            'description' => 'min:2',
         ]);
 
-        // Merging author_id. In real project
-        // we should use $request->user()->id instead.
+        // Merging author_id for Demo purpose.
+        // In real project we should use $request->user()->id instead.
         $data = array_merge(
             $request->all(),
             ['author_id' => 1]
         );
 
-        if (! $thing = Thing::create($data)) {
-            return $this->respond->internalError('Failed to create !');
+        if (! $book = Book::create($data)) {
+            return json()->internalError('Failed to create !');
         }
 
         // respond created item with 201 status code
-        return $this->respond->setStatusCode(201)->withItem(
-            $thing,
-            new ThingTransformer
+        return json()->setStatusCode(201)->withItem(
+            $book,
+            new BookTransformer
         );
 
         // respond with simple message
-        //return $this->respond->created('Created');
+        //return json()->created('Created');
     }
 
     /**
@@ -90,9 +87,9 @@ class ThingsControllerForLumen extends Controller
      */
     public function show($id)
     {
-        return $this->respond->setMeta(['version' => 1])->withItem(
+        return json()->setMeta(['version' => 1])->withItem(
             $this->model->findOrFail($id),
-            new ThingTransformer
+            new BookTransformer
         );
     }
 
@@ -108,16 +105,16 @@ class ThingsControllerForLumen extends Controller
         $this->validate($request, [
             'title'       => 'required|min:2',
             'description' => 'min:2',
-            'deprecated'  => 'boolean'
+            'deprecated'  => 'boolean',
         ]);
 
-        $thing = $this->model->findOrFail($id);
+        $book = $this->model->findOrFail($id);
 
-        if (! $thing->update($request->all())) {
-            return $this->respond->internalError('Failed to update !');
+        if (! $book->update($request->all())) {
+            return json()->internalError('Failed to update !');
         }
 
-        return $this->respond->success('Updated');
+        return json()->success('Updated');
     }
 
     /**
@@ -129,12 +126,12 @@ class ThingsControllerForLumen extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $thing = $this->model->findOrFail($id);
+        $book = $this->model->findOrFail($id);
 
-        if (! $thing->delete()) {
-            return $this->respond->internalError('Failed to delete !');
+        if (! $book->delete()) {
+            return json()->internalError('Failed to delete !');
         }
 
-        return $this->respond->success('Deleted');
+        return json()->success('Deleted');
     }
 }

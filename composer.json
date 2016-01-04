@@ -1,9 +1,8 @@
 {
-  "name": "appkr/fractal",
-  "description": "Fractal Wrapper for Laravel 5",
+  "name": "appkr/api",
+  "description": "RESTful HTTP API dev tool for Laravel or Lumen based project",
   "keywords": [
     "laravel",
-    "api",
     "fractal"
   ],
   "license": "MIT",
@@ -15,7 +14,8 @@
   ],
   "require": {
     "php": ">=5.5.9",
-    "league/fractal": "0.13.*"
+    "league/fractal": "0.13.*",
+    "shrikeh/teapot": "1.0.*"
   },
   "require-dev": {
     "fzaninotto/faker": "1.5.*",
@@ -24,7 +24,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Appkr\\Fractal\\": "src/"
+      "Appkr\\Api\\": "src/"
     },
     "files": [
       "src/helpers.php"
@@ -37,7 +37,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.6-dev"
+      "dev-master": "0.1-dev"
     }
   },
   "suggest": {

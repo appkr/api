@@ -2,7 +2,7 @@
 
 namespace Test\Fractal;
 
-use Appkr\Fractal\Commands\MakeTransformerCommand;
+use Appkr\Api\Commands\MakeTransformerCommand;
 
 class MakeTransformerCommandTest extends \PHPUnit_Framework_TestCase
 {

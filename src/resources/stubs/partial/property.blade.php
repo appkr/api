@@ -5,17 +5,11 @@
      *
      * @var array
      */
-    protected $availableIncludes = [{{include.value}}];
+    protected $availableIncludes = [{!! "'" . $includes->implode('relationship', "', '") ."'" !!}];
 
     /**
      * List of resources to include automatically/always.
      *
      * @var array
      */
-    protected $defaultIncludes = [{{include.value}}];
-
-    /**
-     * List of extra parameters when including other resources.
-     * This is only applicable when including a collection.
-     */
-    private $validParams = ['limit', 'order'];
+    // protected $defaultIncludes = [{!! "'" . $includes->implode('relationship', "', '") ."'" !!}];

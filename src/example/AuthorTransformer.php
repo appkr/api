@@ -1,9 +1,8 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+namespace Appkr\Api\Example;
 
-use League\Fractal;
-use League\Fractal\TransformerAbstract;
+use Appkr\Api\TransformerAbstract;
 
 class AuthorTransformer extends TransformerAbstract
 {
@@ -13,19 +12,19 @@ class AuthorTransformer extends TransformerAbstract
      * @var array
      */
     protected $availableIncludes = [
-        'things'
+        'books',
     ];
 
     /**
      * Transform single resource
      *
-     * @param \Appkr\Fractal\Example\Author $author
+     * @param \Appkr\Api\Example\Author $author
      * @return array
      */
     public function transform(Author $author)
     {
         return [
-            'id'         => (int) $author->id,
+            'id'         => (int)$author->id,
             'name'       => $author->name,
             'email'      => $author->email,
             //'created_at' => (int) $author->created_at->getTimestamp(),
@@ -34,25 +33,32 @@ class AuthorTransformer extends TransformerAbstract
                 'rel'  => 'self',
                 'href' => route('v1.authors.show', [
                     'id'      => $author->id,
-                    'include' => 'things'
-                ])
+                    'include' => 'books',
+                ]),
             ],
-            'things'     => (int) $author->things->count()
+            'books'      => (int)$author->books->count(),
         ];
     }
 
     /**
-     * Include Thing
+     * Include books.
      *
-     * @param \Appkr\Fractal\Example\Author $author
+     * @param \Appkr\Api\Example\Author     $author
+     * @param \League\Fractal\ParamBag|null $params
      * @return \League\Fractal\Resource\Collection|null
+     * @throws \Exception
      */
-    public function includeThings(Author $author)
+    public function includeBooks(Author $author, $params = null)
     {
-        $things = $author->things;
+        if ($params) {
+            $this->validateParams($params);
+        }
 
-        return $things
-            ? $this->collection($things, new ThingTransformer)
-            : null;
+        list($limit, $offset) = $params['limit'] ?: config('api.include.limit');
+        list($orderCol, $orderBy) = $params['order'] ?: config('api.include.order');
+
+        $books = $author->books()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
+
+        return $this->collection($books, new BookTransformer);
     }
 }

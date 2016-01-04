@@ -1,10 +1,10 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+namespace Appkr\Api\Example;
 
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
-class ThingApiTestForLaravel extends ThingApiTestForLumen
+class BookApiTestForLaravel extends BookApiTestForLumen
 {
     use WithoutMiddleware;
 }

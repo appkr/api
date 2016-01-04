@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFractalExampleTable extends Migration
+class CreateAppkrApiExampleTable extends Migration
 {
     /**
      * Run the migrations.
@@ -19,12 +19,13 @@ class CreateFractalExampleTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('things', function (Blueprint $table) {
+        Schema::create('books', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
-            $table->string('author_id');
+            $table->date('published_at')->nullable();
+            $table->integer('author_id')->unsigned()->index();
             $table->text('description')->nullable();
-            $table->enum('deprecated', [0, 1])->default(0);
+            $table->enum('out_of_print', [0, 1])->default(0);
             $table->timestamps();
         });
     }
@@ -37,7 +38,7 @@ class CreateFractalExampleTable extends Migration
     public function down()
     {
         Schema::drop('authors');
-        Schema::drop('things');
+        Schema::drop('books');
     }
 
 }

@@ -1,9 +1,10 @@
 <?php
 
-namespace Appkr\Fractal\Commands;
+namespace Appkr\Api\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Contracts\View\Factory as View;
 
 class MakeTransformerCommand extends Command
 {
@@ -17,6 +18,13 @@ class MakeTransformerCommand extends Command
         {--includes= : Optional list of resources to include. e.g. App\\\\User:author,App\\\\Comment:comments:true If the third element is provided as true, yes, or 1, the command will interpret the include as a collection.}';
 
     /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Create a new transformer class';
+
+    /**
      * Key value pair of required names list.
      *
      * @var array
@@ -24,16 +32,35 @@ class MakeTransformerCommand extends Command
     protected $var = [];
 
     /**
-     * The console command description.
-     *
-     * @var string
+     * @var \Illuminate\Filesystem\Filesystem
      */
-    protected $description = 'Create a new transformer class';
+    protected $file;
 
-    public function __construct(Filesystem $files)
+    /**
+     * @var \Illuminate\View\Factory
+     */
+    protected $view;
+
+    /**
+     * @var \stdClass
+     */
+    protected $subject;
+
+    /**
+     * @var \Illuminate\Support\Collection
+     */
+    protected $includes;
+
+    /**
+     * @param \Illuminate\Filesystem\Filesystem $file
+     * @param \Illuminate\View\Factory          $view
+     */
+    public function __construct(Filesystem $file, View $view)
     {
         parent::__construct();
-        $this->files = $files;
+
+        $this->file = $file;
+        $this->view = $view;
     }
 
     /**
@@ -43,47 +70,21 @@ class MakeTransformerCommand extends Command
      */
     public function fire()
     {
-        $this->calculateVariables();
+        $this->subject = (new ArgumentConverter)->convert($this->argument('subject'));
+        $this->includes = (new OptionParser)->parse($this->option('includes'));
 
-        $name = $this->getVar('subject.transformer');
+        $name = $this->subject->transformer;
         $path = $this->getPath($name);
 
-        if ($this->files->exists($path)) {
-            $this->error("{$name} already exists!");
+        if ($this->file->exists($path)) {
+            $this->error("{$path} already exists!");
 
             return false;
         }
 
-        $this->files->put($path, $this->buildClassContent());
+        $this->file->put($path, $this->buildClassContent()->render());
 
-        $this->info("{$name} created successfully.");
-    }
-
-    /**
-     * Calculate required variables out of the command argument and option.
-     */
-    protected function calculateVariables()
-    {
-        $subject = $this->argument('subject');
-        $includes = $this->option('includes');
-
-        $this->var = [
-            'subject' => (new ArgumentConverter)->convert($subject),
-            'includes' => $includes
-                ? (new OptionParser)->parse($includes)
-                : [],
-        ];
-    }
-
-    /**
-     * Get array value out of $this->var property.
-     *
-     * @param $name
-     * @return mixed
-     */
-    protected function getVar($name)
-    {
-        return array_get($this->var, $name);
+        $this->info("{$path} created successfully.");
     }
 
     /**
@@ -94,7 +95,7 @@ class MakeTransformerCommand extends Command
      */
     protected function getPath($name)
     {
-        return base_path(config('fractal.transformer.dir') . "/{$name}.php");
+        return base_path(config('api.transformer.dir') . "/{$name}.php");
     }
 
     /**
@@ -104,49 +105,9 @@ class MakeTransformerCommand extends Command
      */
     protected function buildClassContent()
     {
-        $bodyStub = $this->files->get(__DIR__ . '/../../stubs/transformer.stub');
-
-        if ($includes = $this->getVar('includes')) {
-            $propertyStub = $this->files->get(__DIR__ . '/../../stubs/include.property.stub');
-            $methods = null;
-
-            foreach($includes as $include) {
-                $methodStub = $include['type'] == 'collection'
-                    ? $this->files->get(__DIR__ . '/../../stubs/include.method.collection.stub')
-                    : $this->files->get(__DIR__ . '/../../stubs/include.method.item.stub');
-
-                $methods .= str_replace(
-                    ['{{include.model}}', '{{include.basename}}', '{{include.relationship}}', '{{include.method}}', '{{include.transformer}}'],
-                    [$include['model'], $include['basename'], $include['relationship'], $include['method'], $include['transformer']],
-                    $methodStub
-                );
-            }
-
-            $propertyStub = str_replace(
-                '{{include.value}}',
-                "'" . implode("', '", array_pluck($includes, 'relationship')) . "'",
-                $propertyStub
-            );
-
-            $bodyStub = str_replace(
-                ['{{include.methods}}', '{{include.property}}'],
-                [$methods, $propertyStub],
-                $bodyStub
-            );
-        } else {
-            $bodyStub = str_replace(
-                ['{{include.methods}}', '{{include.property}}'],
-                ['', ''],
-                $bodyStub
-            );
-        }
-
-        $subject = $this->getVar('subject');
-
-        return str_replace(
-            ['{{subject.model}}', '{{subject.basename}}', '{{subject.object}}', '{{subject.transformer}}', '{{subject.route}}'],
-            [$subject['model'], $subject['basename'], $subject['object'], $subject['transformer'], $subject['route']],
-            $bodyStub
-        );
+        return $this->view->make('api::transformer', [
+            'subject' => $this->subject,
+            'includes' => $this->includes,
+        ]);
     }
 }

@@ -1,11 +1,11 @@
-## `league/fractal` WRAPPER FOR LARAVEL/LUMEN 5#
+## RESTful HTTP API dev tool for Laravel or Lumen based project
 
-[![Latest Stable Version](https://poser.pugx.org/appkr/fractal/v/stable)](https://packagist.org/packages/appkr/fractal) 
-[![Total Downloads](https://poser.pugx.org/appkr/fractal/downloads)](https://packagist.org/packages/appkr/fractal) 
-[![Latest Unstable Version](https://poser.pugx.org/appkr/fractal/v/unstable)](https://packagist.org/packages/appkr/fractal) 
-[![License](https://poser.pugx.org/appkr/fractal/license)](https://packagist.org/packages/appkr/fractal)
+[![Latest Stable Version](https://poser.pugx.org/appkr/api/v/stable)](https://packagist.org/packages/appkr/api) 
+[![Total Downloads](https://poser.pugx.org/appkr/api/downloads)](https://packagist.org/packages/appkr/api) 
+[![Latest Unstable Version](https://poser.pugx.org/appkr/api/v/unstable)](https://packagist.org/packages/appkr/api) 
+[![License](https://poser.pugx.org/appkr/api/license)](https://packagist.org/packages/appkr/api)
 
-# INDEX
+## INDEX
 
 - [ABOUT](#about)
 - [GOAL OF THIS PACKAGE](#goal)
@@ -21,15 +21,13 @@
 <a name="about"></a>
 ## ABOUT
 
-This is a package, or rather an **opinionated/laravelish use case of the famous [`league/fractal`](https://github.com/thephpleague/fractal) package for Laravel 5 and Lumen**. This package was started to fulfill a personal RESTful API service needs. And provided as a separate package, hoping users quickly build his/her RESTful API. 
-
-Among **1. METHOD**, **2. RESOURCE**, and **3. RESPONSE**, which is 3 pillars of REST, this package is mainly focusing on a **3. RESPONSE(=view layer)**. By reading this readme and following along the bundled examples, I hope you understand REST principles, and build a beautiful APIs that everybody can understand easily.
+This package was started to fulfill a personal RESTful API service needs. And provided as a separate package, hoping users quickly build his/her RESTful HTTP API. 
 
 <a name="goal"></a>
 ## GOAL OF THIS PACKAGE
 
-1. Provides easy access to the `league/fractal`'s core instance (via ServiceProvider facility).
-2. Provides easy way of making transformed/serialized http response.
+1. Provides Laravel/Lumen Service Provider for the `league/fractal`.
+2. Provides easy way of making transformed/serialized API response.
 3. Provides make:transformer artisan command.
 4. Provides configuration capability for the response format.
 5. Provides examples, so that users can quickly copy &amp; paste into his/her project.
@@ -37,80 +35,91 @@ Among **1. METHOD**, **2. RESOURCE**, and **3. RESPONSE**, which is 3 pillars of
 <a name="example"></a>
 ## LARAVEL/LUMEN IMPLEMENTATION EXAMPLE
 
-**1. METHOD** and **2. RESOURCE** can be easily handled by Laravel/Lumen routes file.
-
 ### Define METHOD and RESOURCE in Laravel way.
 
 ```php
 // app/Http/routes.php
+Route::group(['prefix' => 'v1'], function () {
+    Route::resource(
+        'books',
+        'BooksController',
+        ['except' => ['create', 'edit']]
+    );
+});
 
-Route::resource(
-    'things',
-    ThingsController::class,
-    ['except' => ['create', 'edit']]
-);
+// Lumen doesn't support RESTful resource route. You have to define them one by one.
+$app->group(['prefix' => 'v1'], function ($app) {
+    $app->get('books', [
+        'as'   => 'v1.books.index',
+        'uses' => 'BooksController@index',
+    ]);
+    $app->get('books/{id}', /*...*/);
+    $app->post('books', /*...*/);
+    $app->put('books/{id}, /*...*/);
+    $app->delete('books/{id}', /*...*/);
+});
 ```
 
-### Fill missing feature for RESTful API with Response class
+### Fill the framework's missing feature for RESTful API
 
-Corresponding to Laravel/Lumen route definition, you can implement your controller in RESTful fashion by injecting `Appkr\Fractal\Http\Response` or with `json()` Helper (**3. RESPONSE**).
+Corresponding to Laravel/Lumen route definition, you can implement your controller in RESTful fashion by injecting `Appkr\Api\Http\Response` or with `json()` Helper.
 
-### Use Case
+#### Use Case
 
 ```php
-// app/Http/Controllers/ThingsController.php
+// app/Http/Controllers/BooksController.php
 
 <?php
 
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ThingsRequest;
-use App\Thing;
-use App\Transformers\ThingTransformer;
+use App\Book;
+use App\Transformers\BookTransformer;
+use Illuminate\Http\Request;
 
-class ThingsController extends Controller
+class BooksController extends Controller
 {
     public function index()
     {
         return json()->withPagination(
-            Thing::latest()->paginate(25),
-            new ThingTransformer
+            Book::latest()->paginate(5),
+            new BookTransformer
         );
     }
 
-    public function store(ThingsRequest $request)
+    public function store(Request $request)
     {
-        return json()->created(Thing::create(array_merge(
-            $request->all(),
-            $request->user()->id
-        )));
+        // Assumes that validation is done by a Form Request
+        return json()->created(
+            $request->user()->create($request->all())
+        );
     }
 
     public function show($id)
     {
         return json()->withItem(
-            Thing::findOrFail($id),
-            new ThingTransformer
+            Book::findOrFail($id),
+            new BookTransformer
         );
     }
 
-    public function update(ThingsRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $thing = Thing::findOrFail($id);
+        $book = Book::findOrFail($id);
 
-        return ($thing->update($request->all()))
+        return ($book->update($request->all()))
             ? json()->success('Updated')
-            : json()->error('Fail to update');
+            : json()->error('Failed to update');
     }
 
     public function destroy($id)
     {
-        $thing = Thing::findOrFail($id);
+        $book = Book::findOrFail($id);
 
-        return ($thing->delete())
+        return ($book->delete())
             ? json()->success('Deleted')
-            : json()->error('Fail to delete');
+            : json()->error('Failed to delete');
     }
 }
 ```
@@ -121,7 +130,7 @@ class ThingsController extends Controller
 ### **Setp #1:** Composer.
 
 ```bash
-$ composer require "appkr/fractal: 0.6.*"
+$ composer require "appkr/api: 0.1.*"
 ```
 
 ### **Step #2:** Add the service provider.
@@ -129,21 +138,21 @@ $ composer require "appkr/fractal: 0.6.*"
 ```php
 // config/app.php (Laravel)
 'providers'=> [
-    Appkr\Fractal\ApiServiceProvider::class,
+    Appkr\Api\ApiServiceProvider::class,
 ]
 
 // boostrap/app.php (Lumen)
-$app->register(Appkr\Fractal\ApiServiceProvider::class);
+$app->register(Appkr\Api\ApiServiceProvider::class);
 ```
 
 ### **Step #3:** [OPTIONAL] Publish assets.
 
 ```bash
 # Laravel only
-$ php artisan vendor:publish --provider="Appkr\Fractal\ApiServiceProvider"
+$ php artisan vendor:publish --provider="Appkr\Api\ApiServiceProvider"
 ```
 
-The config file is located at `config/fractal.php`.
+The config file is located at `config/api.php`.
 
 Done !
 
@@ -152,32 +161,38 @@ Done !
 
 ### What?
 
-You should implement it by yourself. For more about what is it, what you can do with this, and why it is neeeded, [see this page](http://fractal.thephpleague.com/transformers/)
+We should implement transformers by ourselves. For more about what is it, what you can do with this, and why it is required, [see this page](http://fractal.thephpleague.com/transformers/). A recommendation is that at least 1 transformer for 1 model, e.g. `BookTransformer` for `Book`. 
 
 ### Generator
 
-Luckily this package ships with an artisan command conveniently generates a transformer class.
+Luckily this package ships with an artisan command that conveniently generates a transformer class.
 
 ```bash
 $ php artisan make:transformer {subject} {--includes=}
 ```
 
-- `subject` : The string name of the model class. e.g. App\\\\Book
-- `includes` : Optional list of resources to include. e.g. App\\\\User:author,App\\\\Comment:comments:true. If the third element is provided as true, yes, or 1, the command will interpret the include as a collection.
+- `subject` : The string name of the model class. e.g. `App\\Book`
+- `includes` : Optional list of resources to include. e.g. `--includes=App\\User:author,App\\Comment:comments:true`. If the third element is provided as true, the command will interpret the include as a collection.
 
-**`Note`** You should always use double back slashes (\\\\), when passing class name in artisan command.
+**`Note`** We should always use double back slashes (`\\`), when passing a class name in artisan command.
+
+For example:
+
+```bash
+$ php artisan make:transformer App\\Book --includes=App\\User:author,App\\Comment:comments:true
+# Then, we may run make:transformer for User and Comment respectively.
+```
 
 A generated file will look like this:
 
 ```php
 <?php
-
 namespace App\Transformers;
 
 use App\Book;
+use Appkr\Api\TransformerAbstract;
 use League\Fractal;
 use League\Fractal\ParamBag;
-use League\Fractal\TransformerAbstract;
 
 class BookTransformer extends TransformerAbstract
 {
@@ -186,28 +201,22 @@ class BookTransformer extends TransformerAbstract
      * e.g. collection case -> ?include=comments:limit(5|1):order(created_at|desc)
      *      item case       -> ?include=author
      *
-     * @var array
+     * @var  array
      */
     protected $availableIncludes = ['author', 'comments'];
 
     /**
      * List of resources to include automatically/always.
      *
-     * @var array
+     * @var  array
      */
-    protected $defaultIncludes = ['author', 'comments'];
-
-    /**
-     * List of extra parameters when including other resources.
-     * This is only applicable when including a collection.
-     */
-    private $validParams = ['limit', 'order'];
-
+    // protected $defaultIncludes = ['author', 'comments'];
+    
     /**
      * Transform single resource.
      *
-     * @param \App\Book $book
-     * @return array
+     * @param  \App\Book $book
+     * @return  array
      */
     public function transform(Book $book)
     {
@@ -217,7 +226,7 @@ class BookTransformer extends TransformerAbstract
             'created' => $book->created_at->toIso8601String(),
             'link' => [
                  'rel' => 'self',
-                 'href' => route('books.show', $book->id),
+                 'href' => route('api.v1.books.show', $book->id),
             ],
         ];
     }
@@ -225,55 +234,49 @@ class BookTransformer extends TransformerAbstract
     /**
      * Include author.
      *
-     * @param \App\Book $book
-     * @return \League\Fractal\Resource\Item
+     * @param  \App\Book $book
+     * @return  \League\Fractal\Resource\Item
      */
     public function includeAuthor(Book $book)
     {
         return $this->item($book->author, new \App\Transformers\UserTransformer);
-    }
+    }        
     
     /**
      * Include comments.
      *
-     * @param \App\Book $book
-     * @param \League\Fractal\ParamBag
-     * @return \League\Fractal\Resource\Item
-     * @throws \Exception
+     * @param  \App\Book $book
+     * @param  \League\Fractal\ParamBag|null $params
+     * @return  \League\Fractal\Resource\Collection
+     * @throws  \Exception
      */
-    public function includeComments(Book $book, ParamBag $params)
+    public function includeComments(Book $book, $params)
     {
-        $usedParams = array_keys(iterator_to_array($params));
-
-        if ($invalidParams = array_diff($usedParams, $this->validParams)) {
-            throw new \Exception(sprintf('Invalid param(s): "%s". Valid param(s): "%s"', implode(',', $usedParams), implode(',', $this->validParams)));
+        if ($params) {
+            $this->validateParams($params);
         }
 
-        list($limit, $offset) = $params->get('limit') ?: [5,1];
-        list($orderCol, $orderBy) = $params->get('order') ?: ['created_at', 'desc'];
+        list($limit, $offset) = $params->get('limit') ?: config('api.include.limit');
+        list($orderCol, $orderBy) = $params->get('order') ?: config('api.include.order');
 
-        $comments = $book->comments
-            ->take($limit)
-            ->skip($offset)
-            ->orderBy($orderCol, $orderBy)
-            ->get();
+        $comments = $book->comments()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
 
         return $this->collection($comments, new \App\Transformers\CommentTransformer);
     }
 }
 ```
 
-<a name="transformer"></a>
+<a name="config"></a>
 ## CONFIG
 
-Skim thorough the `config/fractal.php`. Inline documented. I think I did my best in articulating for each config.
+Skim through the [`config/api.php`](https://github.com/appkr/api/blob/master/src/config/api.php), which is inline documented. I think I did my best in articulating for each config.
 
 <a name="method"></a>
 ## APIs
 
-The following is the full list of response methods that `Appkr\Fractal\Http\Response` provides. You should use in `YourController` to format API response.
+The following is the full list of response methods that `Appkr\Api\Http\Response` provides. We can use in `OurController` to format API response.
 
-### AVAILABLE RESPONSE METHODS
+### Available Response Methods
 
 ```php
 // Generic response. 
@@ -305,7 +308,7 @@ withPagination(
 );
 
 // Respond json formatted success message
-// fractal.php provides configuration capability
+// api.php provides configuration capability
 success(string|array $message);
 
 // Respond 201
@@ -333,11 +336,17 @@ forbiddenError(string|array|null $message);
 // Respond 404
 notFoundError(string|array|null $message);
 
+// Respond 405
+notAllowedError(string|array|null $message);
+
 // Respond 406
 notAcceptableError(string|array|null $message);
 
 // Respond 409
 conflictError(string|array|null $message);
+
+// Respond 410
+goneError(string|array|null $message);
 
 // Respond 422
 unprocessableError(string|array|null $message);
@@ -358,11 +367,12 @@ setHeaders(array $headers);
 setMeta(array $meta);
 ```
 
-###AVAILABLE HELPER METHODS
+### Available Helper Methods
+
 ```php
 // Make JSON response
-// Returns Appkr\Fractal\Http\Response object if no argument given,
-// from there you can chain any methods listed subsequently.
+// Returns Appkr\Api\Http\Response object if no argument is given,
+// from there you can chain any public apis that are listed above.
 json(array|null $payload)
 
 // Determine if the current framework is Laravel
@@ -371,10 +381,10 @@ is_laravel();
 // Determine if the current framework is Lumen
 is_lumen();
 
-// Determine if the current version of framework is based on 5.1
-is_51();
+// Determine if the current version of framework is based on 5.0.*
+is_50();
 
-// Determine if the current request is generated from an api client
+// Determine if the current request is for API endpoints, and expecting API response
 is_api_request();
 
 // Determine if the request is for update
@@ -385,7 +395,7 @@ is_delete_request();
 ```
 
 <a name="example"></a>
-##BUNDLED EXAMPLE
+## BUNDLED EXAMPLE
 
 Easiest way to learn this package and what RESTful is, I bet. The package is bundled with a set of example. It includes:
 
@@ -400,7 +410,7 @@ Follow the guide to activate and test the example.
 ### **Step #1:** Activate examples
 
 ```php
-// Uncomment the line at vendor/appkr/fractal/src/ApiServiceProvider.php
+// Uncomment the line at vendor/appkr/api/src/ApiServiceProvider.php
 
 $this->publishExamples();
 ```
@@ -409,29 +419,31 @@ $this->publishExamples();
 
 ```bash
 # Migrate/seed tables at a console
+# In order not to pollute, providing --database="name_of_connection" is recommended.
 
-$ php artisan migrate --path="vendor/appkr/fractal/database/migrations"
-$ php artisan db:seed --class="Appkr\Fractal\Example\DatabaseSeeder"
+$ php artisan migrate --path="vendor/appkr/api/src/example/database/migrations" --database="testing"
+$ php artisan db:seed --class="Appkr\Api\Example\DatabaseSeeder" --database="testing"
 ```
 
 ### **Step #3:** Boot up a server and open at a browser
 
 ```bash
 # Boot up a server
-
 $ php artisan serve
 ```
 
-Head on to `http://localhost:8000/v1/things`, and you should see a well formatted json response.
+Head on to `/v1/books`, and you should see a well formatted json response. Try each route to get accustomed to, such as `/v1/books=include=authors`, `/v1/authors=include=books:limit(2|0):order(id|desc)`, `...`.
+
+![](resources/appkr-api-example-img-01.png)
 
 ### **Step #4:** [OPTIONAL] Run integration test
 
 ```bash
 # Laravel
-$ phpunit vendor/appkr/fractal/src/example/ThingApiTestForLaravel.php
+$ phpunit vendor/appkr/api/src/example/BookApiTestForLaravel.php
 
 # Lumen
-$ phpunit vendor/appkr/fractal/src/example/ThingApiTestForLumen.php
+$ phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 ```
 
 **`Note`** _If you finished evaluating the example, don't forget to rollback the migration and re-comment the unnecessary lines at `ApiServiceProvider`._
@@ -440,4 +452,4 @@ $ phpunit vendor/appkr/fractal/src/example/ThingApiTestForLumen.php
 
 ##LICENSE & CONTRIBUTION
 
-This package follows [MIT License](https://raw.githubusercontent.com/appkr/fractal/master/LICENSE). Issues and PRs are welcomed.
+This package follows [MIT License](https://raw.githubusercontent.com/appkr/api/master/LICENSE). Issues and PRs are always welcomed.

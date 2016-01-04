@@ -1,6 +1,6 @@
 <?php
 
-namespace Appkr\Fractal\Http;
+namespace Appkr\Api\Http;
 
 use Illuminate\Foundation\Http\FormRequest;
 

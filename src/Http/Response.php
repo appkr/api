@@ -1,17 +1,18 @@
 <?php
 
-namespace Appkr\Fractal\Http;
+namespace Appkr\Api\Http;
 
-use Appkr\Fractal\Transformers\SimpleArrayTransformer;
+use Appkr\Api\Transformers\SimpleArrayTransformer;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Http\Request;
 use League\Fractal\Manager as Fractal;
 use League\Fractal\Resource\Item as FractalItem;
 use League\Fractal\Resource\Collection as FractalCollection;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use League\Fractal\Serializer\JsonApiSerializer;
+use Teapot\StatusCode;
 
 class Response
 {
@@ -33,17 +34,12 @@ class Response
     /**
      * @var integer Http status code
      */
-    protected $statusCode = 200;
+    protected $statusCode = StatusCode::OK;
 
     /**
      * @var array Http response headers
      */
     protected $headers = [];
-
-    /**
-     * @var string List of includes
-     */
-    protected $includes;
 
     /**
      * @var array List of meta data to append to the response body
@@ -53,14 +49,14 @@ class Response
     /**
      * Create new Response class.
      *
-     * @param \League\Fractal\Manager             $fractal
-     * @param \Illuminate\Http\Request            $request
-     * @param \Appkr\Fractal\Http\ResponseFactory $response
+     * @param \League\Fractal\Manager         $fractal
+     * @param \Illuminate\Http\Request        $request
+     * @param \Appkr\Api\Http\ResponseFactory $response
      */
     public function __construct(Fractal $fractal, Request $request, ResponseFactory $response)
     {
-        $this->fractal  = $fractal;
-        $this->request  = $request;
+        $this->fractal = $fractal;
+        $this->request = $request;
         $this->response = $response->make();
     }
 
@@ -132,11 +128,6 @@ class Response
             $this->meta = [];
         }
 
-        if ($includes = $this->getIncludes()) {
-            $this->fractal->parseIncludes($this->request->input('include'));
-            $this->includes = null;
-        }
-
         return $this->fractal->createData($resource)->toArray();
     }
 
@@ -174,11 +165,6 @@ class Response
         if ($meta = $this->getMeta()) {
             $resource->setMeta($meta);
             $this->meta = [];
-        }
-
-        if ($includes = $this->getIncludes()) {
-            $this->fractal->parseIncludes($this->request->input('include'));
-            $this->includes = null;
         }
 
         return $this->fractal->createData($resource)->toArray();
@@ -231,11 +217,6 @@ class Response
             $this->meta = [];
         }
 
-        if ($includes = $this->getIncludes()) {
-            $this->fractal->parseIncludes($this->request->input('include'));
-            $this->includes = null;
-        }
-
         return $this->fractal->createData($resource)->toArray();
     }
 
@@ -251,7 +232,7 @@ class Response
     public function success($message = 'Success')
     {
         return $this->respond(
-            $this->format($message, config('fractal.successFormat'))
+            $this->format($message, config('api.successFormat'))
         );
     }
 
@@ -270,11 +251,11 @@ class Response
             // it just defer the job to respondItem() method.
             // On receiving the job, respondItem() method does its best
             // to transform the given Elequent Model with SimpleArrayTransformer.
-            return $this->setStatusCode(201)->withItem($primitive);
+            return $this->setStatusCode(StatusCode::CREATED)->withItem($primitive);
         }
 
-        return $this->setStatusCode(201)->respond(
-            $this->format($primitive, config('fractal.successFormat'))
+        return $this->setStatusCode(StatusCode::CREATED)->respond(
+            $this->format($primitive, config('api.successFormat'))
         );
     }
 
@@ -285,7 +266,7 @@ class Response
      */
     public function noContent()
     {
-        return $this->setStatusCode(204)->respond(null);
+        return $this->setStatusCode(StatusCode::NO_CONTENT)->respond(null);
     }
 
     /**
@@ -297,7 +278,7 @@ class Response
      */
     public function error($message = 'Unknown Error')
     {
-        $format = config('fractal.errorFormat');
+        $format = config('api.errorFormat');
 
         if ($message instanceof \Exception) {
             if (env('APP_DEBUG')) {
@@ -305,12 +286,12 @@ class Response
                     'line'  => $message->getLine(),
                     'file'  => $message->getFile(),
                     'class' => get_class($message),
-                    'trace' => explode("\n", $message->getTraceAsString())
+                    'trace' => explode("\n", $message->getTraceAsString()),
                 ];
             }
 
             $this->statusCode = $this->translateExceptionCode($message);
-            $message          = $message->getMessage();
+            $message = $message->getMessage();
         }
 
         return $this->respond(
@@ -326,7 +307,7 @@ class Response
      */
     public function badRequestError($message = 'Bad Request')
     {
-        return $this->setStatusCode(400)->error($message);
+        return $this->setStatusCode(StatusCode::BAD_REQUEST)->error($message);
     }
 
     /**
@@ -337,7 +318,7 @@ class Response
      */
     public function unauthorizedError($message = 'Unauthorized')
     {
-        return $this->setStatusCode(401)->error($message);
+        return $this->setStatusCode(StatusCode::UNAUTHORIZED)->error($message);
     }
 
     /**
@@ -348,7 +329,7 @@ class Response
      */
     public function forbiddenError($message = 'Forbidden')
     {
-        return $this->setStatusCode(403)->error($message);
+        return $this->setStatusCode(StatusCode::FORBIDDEN)->error($message);
     }
 
     /**
@@ -359,7 +340,18 @@ class Response
      */
     public function notFoundError($message = 'Not Found')
     {
-        return $this->setStatusCode(404)->error($message);
+        return $this->setStatusCode(StatusCode::NOT_FOUND)->error($message);
+    }
+
+    /**
+     * Respond 405.
+     *
+     * @param mixed $message
+     * @return \Illuminate\Contracts\Http\Response
+     */
+    public function notAllowedError($message = 'Method Not Allowed')
+    {
+        return $this->setStatusCode(StatusCode::METHOD_NOT_ALLOWED)->error($message);
     }
 
     /**
@@ -370,7 +362,7 @@ class Response
      */
     public function notAcceptableError($message = 'Not Acceptable')
     {
-        return $this->setStatusCode(406)->error($message);
+        return $this->setStatusCode(StatusCode::NOT_ACCEPTABLE)->error($message);
     }
 
     /**
@@ -381,7 +373,18 @@ class Response
      */
     public function conflictError($message = 'Conflict')
     {
-        return $this->setStatusCode(409)->error($message);
+        return $this->setStatusCode(StatusCode::CONFLICT)->error($message);
+    }
+
+    /**
+     * Respond 410.
+     *
+     * @param mixed $message
+     * @return \Illuminate\Contracts\Http\Response
+     */
+    public function goneError($message = 'Gone')
+    {
+        return $this->setStatusCode(StatusCode::GONE)->error($message);
     }
 
     /**
@@ -392,6 +395,7 @@ class Response
      */
     public function unprocessableError($message = 'Unprocessable Entity')
     {
+        // Todo: StatusCode::UNPROCESSABLE_ENTITY is not implemented
         return $this->setStatusCode(422)->error($message);
     }
 
@@ -403,7 +407,7 @@ class Response
      */
     public function internalError($message = 'Internal Server Error')
     {
-        return $this->setStatusCode(500)->error($message);
+        return $this->setStatusCode(StatusCode::INTERNAL_SERVER_ERROR)->error($message);
     }
 
     /* Public getter and setters */
@@ -438,7 +442,7 @@ class Response
      */
     public function getHeaders()
     {
-        $defaultHeaders = config('fractal.defaultHeaders');
+        $defaultHeaders = config('api.defaultHeaders');
 
         return $defaultHeaders
             ? array_merge($defaultHeaders, $this->headers)
@@ -458,35 +462,6 @@ class Response
         }
 
         return $this;
-    }
-
-    /**
-     * Setter for includes property.
-     * This is a wrapper for Fractal::parseInclude()
-     *
-     * @since 0.3
-     * @param array|string $includes Array or csv string of resources to include
-     * @return $this
-     */
-    public function setIncludes($includes)
-    {
-        $this->includes = $includes;
-
-        return $this;
-    }
-
-    /**
-     * Getter for includes property.
-     *
-     * @return string
-     */
-    public function getIncludes()
-    {
-        if ($includes = $this->request->input('include')) {
-            $this->setIncludes($includes);
-        }
-
-        return $this->includes;
     }
 
     /**
@@ -534,7 +509,7 @@ class Response
     {
         $replace = [
             ':message' => $message,
-            ':code'    => $this->getStatusCode()
+            ':code'    => $this->getStatusCode(),
         ];
 
         array_walk_recursive($format, function (&$value, $key) use ($replace) {
@@ -554,7 +529,7 @@ class Response
      * if nothing/null is passed
      *
      * @param $transformer
-     * @return \Appkr\Fractal\Transformers\SimpleArrayTransformer|mixed
+     * @return \Appkr\Api\Transformers\SimpleArrayTransformer|mixed
      */
     private function getTransformer($transformer)
     {
@@ -592,7 +567,7 @@ class Response
                 return $e->getStatusCode();
             }
 
-            if (($statusCode = $this->getStatusCode()) != 200) {
+            if (($statusCode = $this->getStatusCode()) != StatusCode::OK) {
                 return $statusCode;
             }
         }
@@ -600,10 +575,10 @@ class Response
         if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException
             or $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
         ) {
-            return 404;
+            return StatusCode::NOT_FOUND;
         }
 
-        return 400;
+        return StatusCode::BAD_REQUEST;
     }
 
     /* Magic methods */

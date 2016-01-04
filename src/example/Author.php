@@ -1,6 +1,6 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+namespace Appkr\Api\Example;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -8,27 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class Author extends Model implements Authenticatable
 {
     /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
-    protected $table = 'authors';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
         'name',
-        'email'
+        'email',
     ];
 
     # Relationships
 
-    public function things()
+    public function books()
     {
-        return $this->hasMany(Thing::class);
+        return $this->hasMany(Book::class);
     }
 
     /**
@@ -80,5 +73,15 @@ class Author extends Model implements Authenticatable
     public function getRememberTokenName()
     {
         // TODO: Implement getRememberTokenName() method.
+    }
+
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
+    {
+        // TODO: Implement getAuthIdentifierName() method.
     }
 }

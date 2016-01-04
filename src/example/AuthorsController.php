@@ -1,33 +1,26 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+namespace Appkr\Api\Example;
 
 use App\Http\Controllers\Controller;
-use Appkr\Fractal\Http\Response;
+use Teapot\StatusCode;
 
 class AuthorsController extends Controller
 {
     /**
-     * @var \Appkr\Fractal\Example\Author
+     * @var \Appkr\Api\Example\Author
      */
     private $model;
 
     /**
-     * @var \Appkr\Fractal\Http\Response
+     * @param \Appkr\Api\Example\Author $model
      */
-    private $respond;
-
-    /**
-     * @param \Appkr\Fractal\Example\Author $model
-     * @param \Appkr\Fractal\Http\Response  $respond
-     */
-    public function __construct(Author $model, Response $respond)
+    public function __construct(Author $model)
     {
-        $this->model   = $model;
-        $this->respond = $respond;
-        $this->meta    = [
+        $this->model = $model;
+        $this->meta = [
             'version'       => 1,
-            'documentation' => route('v1.doc')
+            'documentation' => route('v1.doc'),
         ];
     }
 
@@ -38,8 +31,8 @@ class AuthorsController extends Controller
      */
     public function index()
     {
-        return $this->respond->setMeta($this->meta)->withPagination(
-            $this->model->latest()->paginate(5),
+        return json()->setMeta($this->meta)->withPagination(
+            $this->model->with('books')->latest()->paginate(5),
             new AuthorTransformer
         );
     }
@@ -52,8 +45,8 @@ class AuthorsController extends Controller
      */
     public function show($id)
     {
-        return $this->respond->setMeta($this->meta)->withItem(
-            $this->model->with('things')->findOrFail($id),
+        return json()->setMeta($this->meta)->withItem(
+            $this->model->findOrFail($id),
             new AuthorTransformer
         );
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Appkr\Fractal\Commands;
+namespace Appkr\Api\Commands;
 
 class OptionParser
 {
@@ -13,12 +13,12 @@ class OptionParser
      * the command will interpret the include as an collection.
      *
      * @param  string $raw
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     public function parse($raw)
     {
         if (empty($raw)) {
-            return [];
+            return collect([]);
         }
 
         $fields = $this->splitIntoFields($raw);
@@ -29,7 +29,7 @@ class OptionParser
             $this->addField($segments);
         }
 
-        return $this->options;
+        return collect($this->options);
     }
 
     /**
@@ -65,22 +65,31 @@ class OptionParser
         }
 
         $fqcn = array_shift($segments);
+
+//        if (! class_exists($fqcn)) {
+//            throw new \Exception(
+//                'Not existing Model - ' . $fqcn
+//            );
+//        }
+
         $relationship = array_shift($segments);
         $type = in_array(array_shift($segments), ['yes', 'y', 'true', true, '1', 1])
             ? 'collection' : 'item';
-        $namespace = config('fractal.transformer.namespace');
+
+        $namespace = config('api.transformer.namespace');
         $namespace = (starts_with($namespace, '\\') ? $namespace : '\\' . $namespace);
         $namespace = (ends_with($namespace, '\\') ? $namespace : $namespace . '\\');
 
-        return [
-            'type' => $type,
-            'fqcn' => $fqcn,
-            'model' => ltrim($fqcn, '\\'),
-            'basename' => class_basename($fqcn),
-            'relationship' => $relationship,
-            'method' => 'include' . ucfirst($relationship),
-            'transformer' => $namespace . ucfirst(class_basename($fqcn)) . 'Transformer',
-        ];
+        $obj = new \stdClass;
+        $obj->type = $type;
+        $obj->fqcn = $fqcn;
+        $obj->model = ltrim($fqcn, '\\');
+        $obj->basename = class_basename($fqcn);
+        $obj->relationship = $relationship;
+        $obj->method = 'include' . ucfirst($relationship);
+        $obj->transformer = $namespace . ucfirst($obj->basename) . 'Transformer';
+
+        return $obj;
     }
 
     /**

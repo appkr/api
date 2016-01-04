@@ -5,36 +5,36 @@ $app->group(['prefix' => 'v1'], function ($app) {
         'as' => 'v1.doc',
         function () {
             return "Placeholder for v1 api documentation page.";
-        }
+        },
     ]);
 
-    $app->get('things', [
-        'as'   => 'v1.things.index',
-        'uses' => \Appkr\Fractal\Example\ThingsControllerForLumen::class . '@index'
+    $app->get('books', [
+        'as'   => 'v1.books.index',
+        'uses' => \Appkr\Api\Example\BooksControllerForLumen::class . '@index',
     ]);
-    $app->get('things/{id}', [
-        'as'   => 'v1.things.show',
-        'uses' => \Appkr\Fractal\Example\ThingsControllerForLumen::class . '@show'
+    $app->get('books/{id}', [
+        'as'   => 'v1.books.show',
+        'uses' => \Appkr\Api\Example\BooksControllerForLumen::class . '@show',
     ]);
-    $app->post('things', [
-        'as'   => 'v1.things.store',
-        'uses' => \Appkr\Fractal\Example\ThingsControllerForLumen::class . '@store'
+    $app->post('books', [
+        'as'   => 'v1.books.store',
+        'uses' => \Appkr\Api\Example\BooksControllerForLumen::class . '@store',
     ]);
-    $app->put('things/{id}', [
-        'as'   => 'v1.things.update',
-        'uses' => \Appkr\Fractal\Example\ThingsControllerForLumen::class . '@update'
+    $app->put('books/{id}', [
+        'as'   => 'v1.books.update',
+        'uses' => \Appkr\Api\Example\BooksControllerForLumen::class . '@update',
     ]);
-    $app->delete('things/{id}', [
-        'as'   => 'v1.things.destroy',
-        'uses' => \Appkr\Fractal\Example\ThingsControllerForLumen::class . '@destroy'
+    $app->delete('books/{id}', [
+        'as'   => 'v1.books.destroy',
+        'uses' => \Appkr\Api\Example\BooksControllerForLumen::class . '@destroy',
     ]);
 
     $app->get('authors', [
         'as'   => 'v1.authors.index',
-        'uses' => \Appkr\Fractal\Example\AuthorsController::class . '@index'
+        'uses' => \Appkr\Api\Example\AuthorsController::class . '@index',
     ]);
     $app->get('authors/{id}', [
         'as'   => 'v1.authors.show',
-        'uses' => \Appkr\Fractal\Example\AuthorsController::class . '@show'
+        'uses' => \Appkr\Api\Example\AuthorsController::class . '@show',
     ]);
 });

@@ -24,28 +24,28 @@ if (! function_exists('is_lumen')) {
     }
 }
 
-if (! function_exists('is_51')) {
+if (! function_exists('is_50')) {
     /**
-     * Determine if the current version of framework is based on 5.1
+     * Determine if the current version of framework is based on 5.0.*
      *
      * @return bool
      */
-    function is_51()
+    function is_50()
     {
-        return str_contains(app()->version(), '5.1');
+        return str_contains(app()->version(), '5.0');
     }
 }
 
 if (! function_exists('is_api_request')) {
     /**
-     * Determine if the current request is generated from an api client
+     * Determine if the current request is for API endpoints, and expecting API response
      *
      * @return mixed
      */
     function is_api_request()
     {
-        return starts_with(app('request')->getHttpHost(), config('fractal.domain'))
-            or app('request')->is(config('fractal.pattern'))
+        return starts_with(app('request')->getHttpHost(), config('api.endpoint.domain'))
+            or app('request')->is(config('api.endpoint.pattern'))
             or app('request')->ajax();
     }
 }
@@ -82,14 +82,14 @@ if (! function_exists('is_delete_request')) {
 
 if (! function_exists('json')) {
     /**
-     * Instantiate Response class or make a json response.
+     * Instantiate a Response class or make a json response.
      *
      * @param array $content
-     * @return \Appkr\Fractal\Http\Response|\Illuminate\Http\JsonResponse
+     * @return \Appkr\Api\Http\Response|\Illuminate\Http\JsonResponse
      */
     function json($content = [])
     {
-        $factory = app(\Appkr\Fractal\Http\Response::class);
+        $factory = app(\Appkr\Api\Http\Response::class);
 
         if (func_num_args() === 0) {
             return $factory;

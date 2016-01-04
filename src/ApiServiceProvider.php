@@ -1,8 +1,8 @@
 <?php
 
-namespace Appkr\Fractal;
+namespace Appkr\Api;
 
-use Appkr\Fractal\Http\Response;
+use Appkr\Api\Http\Response;
 use Illuminate\Support\ServiceProvider;
 use League\Fractal\Manager as Fractal;
 
@@ -15,6 +15,7 @@ class ApiServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->loadStubs();
         $this->publishConfig();
 
         // Uncomment below to activate the example
@@ -29,8 +30,14 @@ class ApiServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(Fractal::class, function ($app) {
+            $config = $app['config'];
+
             $fractal = new Fractal;
-            $fractal->setSerializer(app($app['config']['fractal']['serializer']));
+            $fractal->setSerializer(app($config->get('api.serializer')));
+
+            if ($includes = $app['request']->input($config->get('api.include.key'))) {
+                $fractal->parseIncludes($includes);
+            }
 
             return $fractal;
         });
@@ -43,18 +50,37 @@ class ApiServiceProvider extends ServiceProvider
     }
 
     /**
+     * Load stub files as the form of blade view.
+     */
+    protected function loadStubs()
+    {
+        $this->loadViewsFrom(__DIR__ . '/./resources/stubs', 'api');
+    }
+
+    /**
+     * Publish stub files which will be used as a template
+     * for make:transformer artisan command.
+     */
+//    protected function publishStubs()
+//    {
+//        $this->publishes([
+//            __DIR__ . '/./resources/stubs' => resource_path('views/vendor/api'),
+//        ]);
+//    }
+
+    /**
      * Publish Config.
-     * fractal.php to config/fractal.php
+     * api.php to config/api.php
      */
     protected function publishConfig()
     {
         $this->publishes([
-            realpath(__DIR__ . '/../config/fractal.php') => base_path('config/fractal.php')
+            realpath(__DIR__ . '/./config/api.php') => base_path('config/api.php'),
         ]);
 
         $this->mergeConfigFrom(
-            realpath(__DIR__ . '/../config/fractal.php'),
-            'fractal'
+            realpath(__DIR__ . '/./config/api.php'),
+            'api'
         );
     }
 
@@ -64,8 +90,8 @@ class ApiServiceProvider extends ServiceProvider
     protected function publishExamples()
     {
         $this->publishes([
-            realpath(__DIR__ . '/../database/migrations/') => database_path('migrations'),
-            realpath(__DIR__ . '/../database/factories/')  => database_path('factories')
+            realpath(__DIR__ . '/./example/database/migrations') => database_path('migrations'),
+            realpath(__DIR__ . '/./example/AppkrApiFixture.php')  => database_path('factories'),
         ]);
 
         if (is_laravel()) {
@@ -82,7 +108,7 @@ class ApiServiceProvider extends ServiceProvider
     protected function registerMakeTransfomerCommand()
     {
         $this->app->singleton('api.make.transformer', function ($app) {
-            return $app['Appkr\Fractal\Commands\MakeTransformerCommand'];
+            return $app['Appkr\Api\Commands\MakeTransformerCommand'];
         });
         $this->commands('api.make.transformer');
     }

@@ -1,17 +1,17 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+namespace Appkr\Api\Example;
 
-use Appkr\Fractal\Http\Request;
+use Appkr\Api\Http\Request;
 
-class ThingsRequest extends Request
+class BooksRequest extends Request
 {
     /**
      * @var array
      */
     protected $rules = [
         'title'       => 'required|min:2',
-        'description' => 'min:2'
+        'description' => 'min:2',
     ];
 
     /**
@@ -34,7 +34,7 @@ class ThingsRequest extends Request
         $rules = $this->rules;
 
         if (is_update_request()) {
-            $rules['deprecated'] = 'boolean';
+            $rules['out_of_print'] = 'boolean';
         }
 
         if (is_delete_request()) {

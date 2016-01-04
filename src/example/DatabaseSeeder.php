@@ -1,6 +1,6 @@
 <?php
 
-namespace Appkr\Fractal\Example;
+namespace Appkr\Api\Example;
 
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
@@ -24,28 +24,30 @@ class DatabaseSeeder extends Seeder
         foreach (range(1, 10) as $index) {
             Author::create([
                 'name'  => $faker->userName,
-                'email' => $faker->safeEmail
+                'email' => $faker->safeEmail,
             ]);
         }
 
         $this->command->line("<info>Seeded:</info> authors table");
 
         // Seeding resources table
-        Thing::truncate();
+        Book::truncate();
 
-        $authorIds = (is_51())
-            ? Author::lists('id')->toArray()
-            : Author::lists('id');
+        $authorIds = (is_50())
+            ? Author::lists('id')
+            : Author::lists('id')->toArray();
 
         foreach (range(1, 100) as $index) {
-            Thing::create([
+            Book::create([
                 'title'       => $faker->sentence(),
                 'author_id'   => $faker->randomElement($authorIds),
+                'published_at'=> $faker->dateTimeThisCentury,
                 'description' => $faker->randomElement([$faker->paragraph(), null]),
-                'deprecated'  => $faker->randomElement([0, 1])
+                'out_of_print'=> $faker->randomElement([0, 1]),
+                'created_at'  => $faker->dateTimeThisYear,
             ]);
         }
 
-        $this->command->line("<info>Seeded:</info> things table");
+        $this->command->line("<info>Seeded:</info> books table");
     }
 }
