@@ -248,16 +248,10 @@ class BookTransformer extends TransformerAbstract
      * @param  \App\Book $book
      * @param  \League\Fractal\ParamBag|null $params
      * @return  \League\Fractal\Resource\Collection
-     * @throws  \Exception
      */
     public function includeComments(Book $book, $params)
     {
-        if ($params) {
-            $this->validateParams($params);
-        }
-
-        list($limit, $offset) = $params->get('limit') ?: config('api.include.limit');
-        list($orderCol, $orderBy) = $params->get('order') ?: config('api.include.order');
+        list($limit, $offset, $orderCol, $orderBy) = $this->calculateParams($params);
 
         $comments = $book->comments()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
 

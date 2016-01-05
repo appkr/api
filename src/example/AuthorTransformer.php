@@ -3,6 +3,7 @@
 namespace Appkr\Api\Example;
 
 use Appkr\Api\TransformerAbstract;
+use League\Fractal\ParamBag;
 
 class AuthorTransformer extends TransformerAbstract
 {
@@ -24,7 +25,7 @@ class AuthorTransformer extends TransformerAbstract
     public function transform(Author $author)
     {
         return [
-            'id'         => (int)$author->id,
+            'id'         => (int) $author->id,
             'name'       => $author->name,
             'email'      => $author->email,
             //'created_at' => (int) $author->created_at->getTimestamp(),
@@ -36,7 +37,7 @@ class AuthorTransformer extends TransformerAbstract
                     'include' => 'books',
                 ]),
             ],
-            'books'      => (int)$author->books->count(),
+            'books'      => (int) $author->books->count(),
         ];
     }
 
@@ -46,7 +47,6 @@ class AuthorTransformer extends TransformerAbstract
      * @param \Appkr\Api\Example\Author     $author
      * @param \League\Fractal\ParamBag|null $params
      * @return \League\Fractal\Resource\Collection|null
-     * @throws \Exception
      */
     public function includeBooks(Author $author, ParamBag $params = null)
     {
