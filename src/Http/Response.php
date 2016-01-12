@@ -395,8 +395,19 @@ class Response
      */
     public function unprocessableError($message = 'Unprocessable Entity')
     {
-        // Todo: StatusCode::UNPROCESSABLE_ENTITY is not implemented
         return $this->setStatusCode(StatusCode::UNPROCESSABLE_ENTITY)->error($message);
+    }
+
+    /**
+     * Respond 429.
+     *
+     * @param string $message
+     * @return $this
+     */
+    public function tooManyRequestsError($message = 'Too Many Requests')
+    {
+        // Todo TOO_MANY_REQUESTS no linked in \Teapot\StatusCode
+        return $this->setStatusCode(429)->error($message);
     }
 
     /**
