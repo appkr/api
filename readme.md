@@ -313,6 +313,9 @@ created(string|array|\Illuminate\Database\Eloquent\Model $primitive);
 // Respond 204
 noContent();
 
+// Respond 304
+notModified();
+
 // Generic error response
 // This is another base method. Every other error responses use this.
 // If an instance of \Exception is given as an argument,

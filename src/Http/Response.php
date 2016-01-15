@@ -76,16 +76,19 @@ class Response
             );
         }
 
+        $statusCode = (config('api.suppress_response_code') === true)
+            ? StatusCode::OK : $this->getStatusCode();
+
         return (! $callback = $this->request->input('callback'))
             ? $this->response->json(
                 $payload,
-                $this->getStatusCode(),
+                $statusCode,
                 $this->getHeaders()
             )
             : $this->response->jsonp(
                 $callback,
                 $payload,
-                $this->getStatusCode(),
+                $statusCode,
                 $this->getHeaders()
             );
     }
@@ -267,6 +270,16 @@ class Response
     public function noContent()
     {
         return $this->setStatusCode(StatusCode::NO_CONTENT)->respond(null);
+    }
+
+    /**
+     * Respond 304.
+     *
+     * @return $this
+     */
+    public function notModified()
+    {
+        return $this->setStatusCode(StatusCode::NOT_MODIFIED)->respond(null);
     }
 
     /**
