@@ -23,12 +23,12 @@ class Request extends FormRequest
     /**
      * {@inheritDoc}
      */
-    protected function failedAuthorization()
+    public function forbiddenResponse()
     {
         if (is_api_request()) {
-            return app(Response::class)->unauthorizedError();
+            return app(Response::class)->forbiddenError();
         }
 
-        return parent::failedAuthorization();
+        return response('Forbidden', 403);
     }
 }

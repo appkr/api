@@ -34,21 +34,27 @@ return [
     | e.g. /books?include=author,publisher.somethingelse
     |
     */
-    // 'include' => [
-    //     'key' => 'include',
-    //     'params' => ['limit', 'order'],
-    //     'limit' => [3, 0], // default limit
-    //     'order' => ['created_at', 'desc'], // default order
-    // ],
-
     'include' => [
         'key' => 'include',
         'params' => [ // available modifier params and their default value
-            'limit' => [3, 0],
-            'order' => ['created_at', 'desc'],
+            'limit' => [3, 0], // [limit, offset]
+            'sort' => ['created_at', 'desc'], // [sortKey, sortDirection]
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Partial response
+    |--------------------------------------------------------------------------
+    |
+    | API clients are allowed to select the response format using query string.
+    | This will help saving network bandwidth..
+    | e.g. /author?fields=id,title,link&include=books:fields(id|title|published_at)
+    |
+    */
+    'partial' => [
+        'key' => 'fields',
+    ],
 
     /*
     |--------------------------------------------------------------------------

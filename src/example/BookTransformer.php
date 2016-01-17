@@ -7,7 +7,7 @@ use Appkr\Api\TransformerAbstract;
 class BookTransformer extends TransformerAbstract
 {
     /**
-     * List of resources possible to include
+     * List of resources possible to include.
      *
      * @var array
      */
@@ -16,7 +16,7 @@ class BookTransformer extends TransformerAbstract
     ];
 
     /**
-     * List of resources to automatically include
+     * List of resources to automatically include.
      *
      * @var array
      */
@@ -25,7 +25,7 @@ class BookTransformer extends TransformerAbstract
     //];
 
     /**
-     * Transform single resource
+     * Transform single resource.
      *
      * @param \Appkr\Api\Example\Book $book
      * @return array
@@ -50,15 +50,16 @@ class BookTransformer extends TransformerAbstract
     }
 
     /**
-     * Include Author
+     * Include Author.
      *
      * @param \Appkr\Api\Example\Book $book
+     * @param \League\Fractal\ParamBag $params
      * @return \League\Fractal\Resource\Item|null
      */
-    public function includeAuthor(Book $book)
+    public function includeAuthor(Book $book, ParamBag $params)
     {
         $author = $book->author;
 
-        return $this->item($author, new AuthorTransformer);
+        return $this->item($author, new AuthorTransformer($params));
     }
 }

@@ -7,9 +7,11 @@
      */
     public function {{ $include->method }}({{ $subject->basename }} ${{ $subject->object }}, ParamBag $params = null)
     {
-        list($limit, $offset, $orderCol, $orderBy) = $this->calculateParams($params);
+        $transformer = new {{ $include->transformer }}($params);
 
-        ${{ $include->relationship }} = ${{ $subject->object }}->{{ $include->relationship }}()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
+        extract($transformer->get());
 
-        return $this->collection(${{ $include->relationship }}, new {{ $include->transformer }});
+        ${{ $include->relationship }} = ${{ $subject->object }}->{{ $include->relationship }}()->limit($limit)->offset($offset)->orderBy($sort, $order)->get();
+
+        return $this->collection(${{ $include->relationship }}, $transformer);
     }

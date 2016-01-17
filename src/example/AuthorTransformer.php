@@ -8,7 +8,7 @@ use League\Fractal\ParamBag;
 class AuthorTransformer extends TransformerAbstract
 {
     /**
-     * List of resources possible to include
+     * List of resources possible to include.
      *
      * @var array
      */
@@ -17,7 +17,7 @@ class AuthorTransformer extends TransformerAbstract
     ];
 
     /**
-     * Transform single resource
+     * Transform single resource.
      *
      * @param \Appkr\Api\Example\Author $author
      * @return array
@@ -50,9 +50,11 @@ class AuthorTransformer extends TransformerAbstract
      */
     public function includeBooks(Author $author, ParamBag $params = null)
     {
-        list($limit, $offset, $orderCol, $orderBy) = $this->calculateParams($params);
+        $transformer = new BookTransformer($params);
 
-        $books = $author->books()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
+        extract($transformer->get());
+
+        $books = $author->books()->limit($limit)->offset($offset)->orderBy($sort, $order)->get();
 
         return $this->collection($books, new BookTransformer);
     }

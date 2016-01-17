@@ -2,9 +2,10 @@
      * Include {{ $include->relationship }}.
      *
      * @param \{{ $subject->model }} ${{ $subject->object }}
+     * @param \League\Fractal\ParamBag $params
      * @return \League\Fractal\Resource\Item
      */
-    public function {{ $include->method }}({{ $subject->basename }} ${{ $subject->object }})
+    public function {{ $include->method }}({{ $subject->basename }} ${{ $subject->object }}, ParamBag $params = null)
     {
-        return $this->item(${{ $subject->object }}->{{ $include->relationship }}, new {{ $include->transformer }});
+        return $this->item(${{ $subject->object }}->{{ $include->relationship }}, new {{ $include->transformer }}($params));
     }

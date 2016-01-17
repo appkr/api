@@ -20,7 +20,7 @@ class {{ $subject->transformer }} extends TransformerAbstract
      */
     public function transform({{ $subject->basename }} ${{ $subject->object }})
     {
-        return [
+        $payload = [
             'id' => (int) ${{ $subject->object }}->id,
             // ...
             'created' => ${{ $subject->object }}->created_at->toIso8601String(),
@@ -29,6 +29,12 @@ class {{ $subject->transformer }} extends TransformerAbstract
                  'href' => route('{{ $subject->route }}', ${{ $subject->object }}->id),
             ],
         ];
+
+        if ($fields = $this->getPartialFields()) {
+            $payload = array_only($payload, $fields);
+        }
+
+        return $payload;
     }
 
 @forelse($includes as $include)

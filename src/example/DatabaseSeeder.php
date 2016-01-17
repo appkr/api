@@ -48,6 +48,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        Eloquent::regard();
+
         $this->command->line("<info>Seeded:</info> books table");
     }
 }

@@ -11,8 +11,10 @@
 - [GOAL OF THIS PACKAGE](#goal)
 - [LARAVEL/LUMEN IMPLEMENTATION EXAMPLE](#example)
 - [HOW TO INSTALL](#install)
-- [TRANSFORMER](#transformer)
 - [CONFIG](#config)
+- [TRANSFORMER](#transformer)
+- [NESTING SUB-RESOURCE](#nesting)
+- [PARTIAL RESPONSE](#partial)
 - [APIs](#method)
 - [BUNDLED EXAMPLE](#example)
 
@@ -27,9 +29,9 @@ This package was started to fulfill a personal RESTful API service needs. And pr
 ## GOAL OF THIS PACKAGE
 
 1. Provides Laravel/Lumen Service Provider for the `league/fractal`.
-2. Provides easy way of making transformed/serialized API response.
-3. Provides make:transformer artisan command.
-4. Provides configuration capability for the response format.
+2. Provides configuration capability for the library.
+3. Provides easy way of making transformed/serialized API response.
+4. Provides make:transformer artisan command.
 5. Provides examples, so that users can quickly copy &amp; paste into his/her project.
 
 <a name="example"></a>
@@ -156,6 +158,11 @@ The config file is located at `config/api.php`.
 
 Done !
 
+<a name="config"></a>
+## CONFIG
+
+Skim through the [`config/api.php`](https://github.com/appkr/api/blob/master/src/config/api.php), which is inline documented. I think I did my best in articulating for each config.
+
 <a name="transformer"></a>
 ## TRANSFORMER
 
@@ -235,11 +242,12 @@ class BookTransformer extends TransformerAbstract
      * Include author.
      *
      * @param  \App\Book $book
+     * @param \League\Fractal\ParamBag $params
      * @return  \League\Fractal\Resource\Item
      */
-    public function includeAuthor(Book $book)
+    public function includeAuthor(Book $book, ParamBag $params = null)
     {
-        return $this->item($book->author, new \App\Transformers\UserTransformer);
+        return $this->item($book->author, new \App\Transformers\UserTransformer($params));
     }        
     
     /**
@@ -249,26 +257,58 @@ class BookTransformer extends TransformerAbstract
      * @param  \League\Fractal\ParamBag|null $params
      * @return  \League\Fractal\Resource\Collection
      */
-    public function includeComments(Book $book, $params)
+    public function includeComments(Book $book, ParamBag $params = null)
     {
-        list($limit, $offset, $orderCol, $orderBy) = $this->calculateParams($params);
+        $transformer = new \App\Transformers\CommentTransformer($params);
 
-        $comments = $book->comments()->limit($limit)->offset($offset)->orderBy($orderCol, $orderBy)->get();
+        extract($transformer->get());
 
-        return $this->collection($comments, new \App\Transformers\CommentTransformer);
+        $comments = $book->comments()->limit($limit)->offset($offset)->orderBy($sort, $order)->get();
+
+        return $this->collection($comments, $transformer);
     }
 }
 ```
 
-<a name="config"></a>
-## CONFIG
+<a name="nesting"></a>
+## NESTING SUB-RESOURCES
 
-Skim through the [`config/api.php`](https://github.com/appkr/api/blob/master/src/config/api.php), which is inline documented. I think I did my best in articulating for each config.
+Try the following.
+
+```HTTP
+GET /authors?include=books:limit(3|0):sort(id|desc)
+```
+
+When including multiple sub resources,
+
+```HTTP
+GET /authors?include[]=books:limit(2|0)&include[]=comments:sort(id|asc)
+
+# or alternatively
+GET /authors?include=books:limit(2|0),comments:sort(id|asc)
+```
+
+In case of deep recursive nesting, use dot (.).
+
+```HTTP
+GET /books?include=author,publisher.somethingelse
+```
+
+<a name="partial"></a>
+## PARTIAL RESPONSE
+
+Try the following.
+
+```HTTP
+GET /authors?fields=id,name,email&include=books:limit(3|0):fields(id|title|published_at)
+```
+
+Note that, for parent resource, we used comma (,) as the field delimiter , while pipe (|) was used for children.  
 
 <a name="method"></a>
 ## APIs
 
-The following is the full list of response methods that `Appkr\Api\Http\Response` provides. We can use in `OurController` to format API response.
+The following is the full list of response methods that `Appkr\Api\Http\Response` provides. Really handy when making a json response in a controller.
 
 ### Available Response Methods
 

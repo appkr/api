@@ -8,43 +8,112 @@ use League\Fractal\TransformerAbstract as FractalTransformer;
 abstract class TransformerAbstract extends FractalTransformer
 {
     /**
-     * Calculate limit and offset modifiers out of the give params.
-     * When consume the return value of this method, the ORDER matters.
-     *
-     * @param \League\Fractal\ParamBag|null $params
-     * @return array [$limit, $offset, $orderCol, $orderBy]
-     * @throws \Exception
+     * @var \League\Fractal\ParamBag
      */
-    protected function calculateParams(ParamBag $params = null)
+    protected $params;
+
+    /**
+     * @var array
+     */
+    protected $parsed;
+
+    public function __construct(ParamBag $params = null)
     {
-        if ($params === null) {
-            // Temporarily work-around for https://github.com/thephpleague/fractal/issues/250
-            $params = new ParamBag(config('api.include.params'));
-        } else {
-            $this->validateParams($params);
+        $this->params = $params;
+
+        if ($this->params === null) {
+            // Temporary work-around
+            // @see https://github.com/thephpleague/fractal/issues/250
+            $this->params = new ParamBag(config('api.include.params'));
         }
 
-        return array_merge(
-            $params->get('limit') ?: config('api.include.params.limit'),
-            $params->get('order') ?: config('api.include.params.order')
-        );
+        $this->validateParams();
+
+        $this->parse();
+    }
+
+    /**
+     * Get the parsed value for the given key.
+     *
+     * @param null $key
+     * @return array|string|null
+     */
+    public function get($key = null)
+    {
+        if (empty($this->parsed)) {
+            return null;
+        }
+
+        if (is_null($key)) {
+            return $this->parsed;
+        }
+
+        return $this->parsed[$key];
+    }
+
+    /**
+     * Parse the given ParamBag and merge them with default values.
+     *
+     * @return array
+     */
+    protected function parse()
+    {
+        $config = config('api.include.params');
+        $partialKey = config('api.partial.key');
+
+        $limit  = $this->params->get('limit') ?: $config['limit'];
+        $sort   = $this->params->get('sort') ?: $config['sort'];
+        $fields = $this->params->get($partialKey);
+
+        $this->parsed = [
+            'limit'  => $limit[0],
+            'offset' => $limit[1],
+            'sort'   => $sort[0],
+            'order'  => $sort[1],
+            $partialKey => $fields,
+        ];
     }
 
     /**
      * Validate include params.
      * We already define the white lists in the config.
      *
-     * @param \League\Fractal\ParamBag $params
+     * @return bool
      * @throws \Exception
      */
-    protected function validateParams(ParamBag $params)
+    protected function validateParams()
     {
-        $validParams = array_keys(config('api.include.params'));
+        $validParams = array_merge(
+            array_keys(config('api.include.params')),
+            [config('api.partial.key')]
+        );
 
-        $usedParams = array_keys(iterator_to_array($params));
+        $usedParams = array_keys(iterator_to_array($this->params));
 
         if ($invalidParams = array_diff($usedParams, $validParams)) {
             throw new \Exception(sprintf('Invalid param(s): "%s". Valid param(s): "%s"', implode(', ', $usedParams), implode(', ', $validParams)));
         }
+
+        return true;
+    }
+
+    /**
+     * Calculate the list of fields for partial response.
+     *
+     * @return array
+     */
+    protected function getPartialFields()
+    {
+        $partialKey = config('api.partial.key');
+
+        if ($fields = $this->get($partialKey)) {
+            return $fields;
+        }
+
+        if ($fields = request()->input($partialKey)) {
+            return explode(',', $fields);
+        }
+
+        return [];
     }
 }
