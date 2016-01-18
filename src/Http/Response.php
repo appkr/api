@@ -294,7 +294,7 @@ class Response
         $format = config('api.errorFormat');
 
         if ($message instanceof \Exception) {
-            if (env('APP_DEBUG')) {
+            if (config('api.debug') === true) {
                 $format['debug'] = [
                     'line'  => $message->getLine(),
                     'file'  => $message->getFile(),
