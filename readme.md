@@ -410,10 +410,10 @@ setMeta(array $meta);
 // We can apply this method against an instantiated transformer,
 // to get the parsed query parameters that belongs only to the current resource.
 // 
-// e.g. GET /v1/books?include[]=books:limit(2|0):fields(id|title|published_at)&include[]=comments:sort(id|asc)
+// e.g. GET /v1/author?include[]=books:limit(2|0):fields(id|title|published_at)&include[]=comments:sort(id|asc)
 //      $transformer = new BookTransformer;
 //      $transformer->get(); 
-// will produces
+// Will produce all parsed parameters:
 //      [
 //          'limit'  => 2 // if not given default value at config
 //          'offset' => 0 // if not given default value at config
@@ -421,9 +421,9 @@ setMeta(array $meta);
 //          'order'  => 'desc' // if given, given value
 //          'fields' => ['id', 'title', 'published_at'] // if not given, null
 //      ]
-// alternatively we can pass a key. 
+// Alternatively we can pass a key. 
 //      $transformer->get('limit');
-// will produces
+// Will produce limit parameter:
 //      2
 get(string|null $key)
 
