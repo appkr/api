@@ -227,7 +227,7 @@ class BookTransformer extends TransformerAbstract
      */
     public function transform(Book $book)
     {
-        return [
+        $payload = [
             'id' => (int) $book->id,
             // ...
             'created' => $book->created_at->toIso8601String(),
@@ -242,7 +242,7 @@ class BookTransformer extends TransformerAbstract
      * Include author.
      *
      * @param  \App\Book $book
-     * @param \League\Fractal\ParamBag $params
+     * @param \League\Fractal\ParamBag|null $params
      * @return  \League\Fractal\Resource\Item
      */
     public function includeAuthor(Book $book, ParamBag $params = null)
@@ -261,9 +261,9 @@ class BookTransformer extends TransformerAbstract
     {
         $transformer = new \App\Transformers\CommentTransformer($params);
 
-        extract($transformer->get());
+        $parsed = $transformer->getParsedParams();
 
-        $comments = $book->comments()->limit($limit)->offset($offset)->orderBy($sort, $order)->get();
+        $comments = $book->comments()->limit($parsed['limit'])->offset($parsed['offset'])->orderBy($parsed['sort'], $parsed['order'])->get();
 
         return $this->collection($comments, $transformer);
     }
@@ -310,7 +310,7 @@ Note that, for parent resource, we used comma (,) as the field delimiter , while
 
 The following is the full list of response methods that `Appkr\Api\Http\Response` provides. Really handy when making a json response in a controller.
 
-### Available Response Methods
+### `Appkr\Api\Response` - Available Methods
 
 ```php
 // Generic response. 
@@ -392,19 +392,47 @@ unprocessableError(string|array|null $message);
 internalError(string|array|null $message);
 
 // Set http status code
-// This method is chainable
+// This method is chain-able
 setStatusCode(int $statusCode);
 
 // Set http response header
-// This method is chainable
+// This method is chain-able
 setHeaders(array $headers);
 
 // Set additional meta data
-// This method is chainable
+// This method is chain-able
 setMeta(array $meta);
 ```
 
-### Available Helper Methods
+### `Appkr\Api\TransformerAbstract` - Available Methods
+
+```php
+// We can apply this method against an instantiated transformer,
+// to get the parsed query parameters that belongs only to the current resource.
+// 
+// e.g. GET /v1/books?include[]=books:limit(2|0):fields(id|title|published_at)&include[]=comments:sort(id|asc)
+//      $transformer = new BookTransformer;
+//      $transformer->get(); 
+// will produces
+//      [
+//          'limit'  => 2 // if not given default value at config
+//          'offset' => 0 // if not given default value at config
+//          'sort'   => 'created_at' // if given, given value
+//          'order'  => 'desc' // if given, given value
+//          'fields' => ['id', 'title', 'published_at'] // if not given, null
+//      ]
+// alternatively we can pass a key. 
+//      $transformer->get('limit');
+// will produces
+//      2
+get(string|null $key)
+
+// Exactly does the same function as get.
+// Was laid here, to enhance readability.
+getParsedParams(string|null $key)
+```
+
+### `helpers.php` - Available Methods
 
 ```php
 // Make JSON response
@@ -417,9 +445,6 @@ is_laravel();
 
 // Determine if the current framework is Lumen
 is_lumen();
-
-// Determine if the current version of framework is based on 5.0.*
-is_50();
 
 // Determine if the current request is for API endpoints, and expecting API response
 is_api_request();
@@ -457,9 +482,10 @@ $this->publishExamples();
 ```bash
 # Migrate/seed tables at a console
 # In order not to pollute, providing --database="name_of_connection" is recommended.
+# We assume the test database driver name is 'sqlite'.
 
-$ php artisan migrate --path="vendor/appkr/api/src/example/database/migrations" --database="testing"
-$ php artisan db:seed --class="Appkr\Api\Example\DatabaseSeeder" --database="testing"
+$ php artisan migrate --path="vendor/appkr/api/src/example/database/migrations" --database="sqlite"
+$ php artisan db:seed --class="Appkr\Api\Example\DatabaseSeeder" --database="sqlite"
 ```
 
 ### **Step #3:** Boot up a server and open at a browser

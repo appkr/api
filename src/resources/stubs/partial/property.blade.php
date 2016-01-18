@@ -8,7 +8,7 @@
     protected $availableIncludes = [{!! "'" . $includes->implode('relationship', "', '") ."'" !!}];
 
     /**
-     * List of resources to include automatically/always.
+     * List of resources to be included always.
      *
      * @var array
      */

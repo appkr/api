@@ -24,7 +24,7 @@ class AuthorTransformer extends TransformerAbstract
      */
     public function transform(Author $author)
     {
-        return [
+        $payload = [
             'id'         => (int) $author->id,
             'name'       => $author->name,
             'email'      => $author->email,
@@ -39,6 +39,12 @@ class AuthorTransformer extends TransformerAbstract
             ],
             'books'      => (int) $author->books->count(),
         ];
+
+        if ($fields = $this->getPartialFields()) {
+            $payload = array_only($payload, $fields);
+        }
+
+        return $payload;
     }
 
     /**
@@ -46,15 +52,15 @@ class AuthorTransformer extends TransformerAbstract
      *
      * @param \Appkr\Api\Example\Author     $author
      * @param \League\Fractal\ParamBag|null $params
-     * @return \League\Fractal\Resource\Collection|null
+     * @return \League\Fractal\Resource\Collection
      */
     public function includeBooks(Author $author, ParamBag $params = null)
     {
         $transformer = new BookTransformer($params);
 
-        extract($transformer->get());
+        $parsed = $transformer->getParsedParams();
 
-        $books = $author->books()->limit($limit)->offset($offset)->orderBy($sort, $order)->get();
+        $books = $author->books()->limit($parsed['limit'])->offset($parsed['offset'])->orderBy($parsed['sort'], $parsed['order'])->get();
 
         return $this->collection($books, new BookTransformer);
     }

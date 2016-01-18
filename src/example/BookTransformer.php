@@ -3,6 +3,7 @@
 namespace Appkr\Api\Example;
 
 use Appkr\Api\TransformerAbstract;
+use League\Fractal\ParamBag;
 
 class BookTransformer extends TransformerAbstract
 {
@@ -32,34 +33,38 @@ class BookTransformer extends TransformerAbstract
      */
     public function transform(Book $book)
     {
-        return [
-            'id'           => (int)$book->id,
+        $payload = [
+            'id'           => (int) $book->id,
             'title'        => $book->title,
             'description'  => $book->description,
             'out_of_print' => (bool) $book->out_of_print == 1,
             'published_yr' => property_exists($book, 'published_at') ? $book->published_at->format('Y') : 'unknown',
-            'link'        => [
+            'link'         => [
                 'rel'  => 'self',
                 'href' => route('v1.books.show', [
                     'id'      => $book->id,
                     'include' => 'author',
                 ]),
             ],
-            'author'      => $book->author->name,
+            'author'       => $book->author->name,
         ];
+
+        if ($fields = $this->getPartialFields()) {
+            $payload = array_only($payload, $fields);
+        }
+
+        return $payload;
     }
 
     /**
      * Include Author.
      *
-     * @param \Appkr\Api\Example\Book $book
+     * @param \Appkr\Api\Example\Book  $book
      * @param \League\Fractal\ParamBag $params
-     * @return \League\Fractal\Resource\Item|null
+     * @return \League\Fractal\Resource\Item
      */
-    public function includeAuthor(Book $book, ParamBag $params)
+    public function includeAuthor(Book $book, ParamBag $params = null)
     {
-        $author = $book->author;
-
-        return $this->item($author, new AuthorTransformer($params));
+        return $this->item($book->author, new AuthorTransformer($params));
     }
 }

@@ -33,10 +33,22 @@ abstract class TransformerAbstract extends FractalTransformer
     }
 
     /**
+     * Helper to enhance readability.
+     *
+     * @param string|null $key
+     * @return array|null|string
+     */
+    public function getParsedParams($key = null)
+    {
+        return $this->get($key);
+    }
+
+    /**
      * Get the parsed value for the given key.
      *
-     * @param null $key
-     * @return array|string|null
+     * @param string|null $key
+     * @return array|null|string
+     * @throws \Exception
      */
     public function get($key = null)
     {
@@ -46,6 +58,12 @@ abstract class TransformerAbstract extends FractalTransformer
 
         if (is_null($key)) {
             return $this->parsed;
+        }
+
+        $allowedKeys = ['limit', 'offset', 'sort', 'order', config('api.partial.key')];
+
+        if (! in_array($key, $allowedKeys)) {
+            throw new \Exception(sprintf('Invalid key: "%s". Valid key(s): "%s"', $key, implode(', ', $allowedKeys)));
         }
 
         return $this->parsed[$key];
