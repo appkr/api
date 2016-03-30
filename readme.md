@@ -132,7 +132,7 @@ class BooksController extends Controller
 ### **Setp #1:** Composer.
 
 ```bash
-$ composer require "appkr/api: 0.1.*"
+$ composer require "appkr/api: 1.*"
 ```
 
 ### **Step #2:** Add the service provider.

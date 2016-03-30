@@ -83,7 +83,8 @@ class Response
             ? $this->response->json(
                 $payload,
                 $statusCode,
-                $this->getHeaders()
+                $this->getHeaders(),
+                JSON_PRETTY_PRINT
             )
             : $this->response->jsonp(
                 $callback,
