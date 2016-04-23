@@ -11,7 +11,11 @@
 
         $parsed = $transformer->getParsedParams();
 
-        ${{ $include->relationship }} = ${{ $subject->object }}->{{ $include->relationship }}()->limit($parsed['limit'])->offset($parsed['offset'])->orderBy($parsed['sort'], $parsed['order'])->get();
+        ${{ $include->relationship }} = ${{ $subject->object }}->{{ $include->relationship }}()
+            ->limit($parsed['limit'])
+            ->offset($parsed['offset'])
+            ->orderBy($parsed['sort'], $parsed['order'])
+            ->get();
 
         return $this->collection(${{ $include->relationship }}, $transformer);
     }

@@ -36,6 +36,18 @@ if (! function_exists('is_50')) {
     }
 }
 
+if (! function_exists('is_52')) {
+    /**
+     * Determine if the current version of framework is based on 5.2.*
+     *
+     * @return bool
+     */
+    function is_52()
+    {
+        return str_contains(app()->version(), '5.2');
+    }
+}
+
 if (! function_exists('is_api_request')) {
     /**
      * Determine if the current request is for API endpoints, and expecting API response

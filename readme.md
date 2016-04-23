@@ -1,46 +1,52 @@
-## RESTful HTTP API dev tool for Laravel or Lumen based project
+# RESTful HTTP API component for Laravel or Lumen based project
 
 [![Latest Stable Version](https://poser.pugx.org/appkr/api/v/stable)](https://packagist.org/packages/appkr/api) 
 [![Total Downloads](https://poser.pugx.org/appkr/api/downloads)](https://packagist.org/packages/appkr/api) 
 [![Latest Unstable Version](https://poser.pugx.org/appkr/api/v/unstable)](https://packagist.org/packages/appkr/api) 
 [![License](https://poser.pugx.org/appkr/api/license)](https://packagist.org/packages/appkr/api)
 
+**[한국어 매뉴얼](readme_ko.md)**
+
 ## INDEX
 
-- [ABOUT](#about)
-- [GOAL OF THIS PACKAGE](#goal)
-- [LARAVEL/LUMEN IMPLEMENTATION EXAMPLE](#example)
-- [HOW TO INSTALL](#install)
-- [CONFIG](#config)
-- [TRANSFORMER](#transformer)
-- [NESTING SUB-RESOURCE](#nesting)
-- [PARTIAL RESPONSE](#partial)
-- [APIs](#method)
-- [BUNDLED EXAMPLE](#example)
+-   [1. ABOUT](#about)
+-   [2. FEATURE](#goal)
+-   [3. LARAVEL/LUMEN IMPLEMENTATION EXAMPLE](#example)
+-   [4. HOW TO INSTALL](#install)
+-   [5. CONFIG](#config)
+-   [6. TRANSFORMER](#transformer)
+-   [7. NESTING SUB-RESOURCE](#nesting)
+-   [8. PARTIAL RESPONSE](#partial)
+-   [9. APIs](#method)
+-   [10. BUNDLED EXAMPLE](#example)
+-   LICENSE & CONTRIBUTION
 
 ---
 
 <a name="about"></a>
-## ABOUT
+## 1. ABOUT
 
-This package was started to fulfill a personal RESTful API service needs. And provided as a separate package, hoping users quickly build his/her RESTful HTTP API. 
+A lightweight RESTful API builder for Laravel or/and Lumen project.
 
 <a name="goal"></a>
-## GOAL OF THIS PACKAGE
+## 2. FEATURE
 
 1. Provides Laravel/Lumen Service Provider for the `league/fractal`.
 2. Provides configuration capability for the library.
 3. Provides easy way of making transformed/serialized API response.
-4. Provides make:transformer artisan command.
+4. Provides `make:transformer` artisan command.
 5. Provides examples, so that users can quickly copy &amp; paste into his/her project.
 
 <a name="example"></a>
-## LARAVEL/LUMEN IMPLEMENTATION EXAMPLE
+## 3. LARAVEL/LUMEN IMPLEMENTATION EXAMPLE(How to use)
 
-### Define METHOD and RESOURCE in Laravel way.
+### 3.1. API Endpoint
+
+Define RESTful resource route in Laravel way.
 
 ```php
 // app/Http/routes.php
+
 Route::group(['prefix' => 'v1'], function () {
     Route::resource(
         'books',
@@ -48,25 +54,40 @@ Route::group(['prefix' => 'v1'], function () {
         ['except' => ['create', 'edit']]
     );
 });
+```
 
-// Lumen doesn't support RESTful resource route. You have to define them one by one.
+Lumen doesn't support RESTful resource route. You have to define them one by one.
+
+```
+// app/Http/routes.php
+
 $app->group(['prefix' => 'v1'], function ($app) {
     $app->get('books', [
         'as'   => 'v1.books.index',
         'uses' => 'BooksController@index',
     ]);
-    $app->get('books/{id}', /*...*/);
-    $app->post('books', /*...*/);
-    $app->put('books/{id}, /*...*/);
-    $app->delete('books/{id}', /*...*/);
+    $app->get('books/{id}', [
+        'as'   => 'v1.books.show',
+        'uses' => 'BooksController@show',
+    ]);
+    $app->post('books', [
+        'as'   => 'v1.books.store',
+        'uses' => 'BooksController@store',
+    ]);
+    $app->put('books/{id}, [
+       'as'   => 'v1.books.update',
+       'uses' => 'BooksController@update',
+   ]);
+    $app->delete('books/{id}', [
+       'as'   => 'v1.books.destroy',
+       'uses' => 'BooksController@destroy',
+   ]);
 });
 ```
 
-### Fill the framework's missing feature for RESTful API
+### 3.2. Controller
 
-Corresponding to Laravel/Lumen route definition, you can implement your controller in RESTful fashion by injecting `Appkr\Api\Http\Response` or with `json()` Helper.
-
-#### Use Case
+The subsequent code block is the controller logic for `/v1/books/{id}` endpoint. Note the use cases of `json()` helper and transformer on the following code block.
 
 ```php
 // app/Http/Controllers/BooksController.php
@@ -92,7 +113,7 @@ class BooksController extends Controller
 
     public function store(Request $request)
     {
-        // Assumes that validation is done by a Form Request
+        // Assumes that validation is done at somewhere else
         return json()->created(
             $request->user()->create($request->all())
         );
@@ -127,68 +148,77 @@ class BooksController extends Controller
 ```
 
 <a name="install"></a>
-##HOW TO INSTALL
+## 4. HOW TO INSTALL
 
-### **Setp #1:** Composer.
+### 4.1. Composer.
 
-```bash
+```sh
 $ composer require "appkr/api: 1.*"
 ```
 
-### **Step #2:** Add the service provider.
+### 4.2. Add the service provider.
 
 ```php
 // config/app.php (Laravel)
+
 'providers'=> [
     Appkr\Api\ApiServiceProvider::class,
 ]
+```
 
+```php
 // boostrap/app.php (Lumen)
+
 $app->register(Appkr\Api\ApiServiceProvider::class);
 ```
 
-### **Step #3:** [OPTIONAL] Publish assets.
+### 4.3. [OPTIONAL] Publish assets.
 
-```bash
+```sh
 # Laravel only
 $ php artisan vendor:publish --provider="Appkr\Api\ApiServiceProvider"
 ```
 
-The config file is located at `config/api.php`.
+The configuration file is located at `config/api.php`.
 
 Done !
 
 <a name="config"></a>
-## CONFIG
+## 5. CONFIG
 
-Skim through the [`config/api.php`](https://github.com/appkr/api/blob/master/src/config/api.php), which is inline documented. I think I did my best in articulating for each config.
+Skim through the [`config/api.php`](https://github.com/appkr/api/blob/master/src/config/api.php), which is inline documented.
 
 <a name="transformer"></a>
-## TRANSFORMER
+## 6. TRANSFORMER
 
-### What?
+### 6.1. What?
 
-We should implement transformers by ourselves. For more about what is it, what you can do with this, and why it is required, [see this page](http://fractal.thephpleague.com/transformers/). A recommendation is that at least 1 transformer for 1 model, e.g. `BookTransformer` for `Book`. 
+For more about what the transformer is, what you can do with this, and why it is required, [see this page](http://fractal.thephpleague.com/transformers/). 1 transformer for 1 model is a best practice(e.g. `BookTransformer` for `Book` model). 
 
-### Generator
+### 6.2. Transformer Boilerplate Generator
 
 Luckily this package ships with an artisan command that conveniently generates a transformer class.
 
-```bash
+```sh
 $ php artisan make:transformer {subject} {--includes=}
+# e.g. php artisan make:transformer "App\Book" --includes="App\\User:author,App\\Comment:comments:true"
 ```
 
-- `subject` : The string name of the model class. e.g. `App\\Book`
-- `includes` : Optional list of resources to include. e.g. `--includes=App\\User:author,App\\Comment:comments:true`. If the third element is provided as true, the command will interpret the include as a collection.
+-   `subject`_ The string name of the model class.
 
-**`Note`** We should always use double back slashes (`\\`), when passing a class name in artisan command.
+-   `includes`_ Sub-resources that is related to the subject model. By providing this option, your API client can have control over the response body. see [NESTING SUB RESOURCES](#nesting) section. 
 
-For example:
+    The option's signature is `--include=Model,eloquent_relationship_methods[,isCollection]`. 
+    
+    If the include-able sub-resource is a type of collection, like `Book` and `Comment` relationship in the example, we provide `true` as the third value of the option.
 
-```bash
-$ php artisan make:transformer App\\Book --includes=App\\User:author,App\\Comment:comments:true
-# Then, we may run make:transformer for User and Comment respectively.
-```
+> **`Note`** 
+>
+> We should always use double back slashes (`\\`), when passing a namespace in artisan command WITHOUT quotation marks.
+>
+>```sh
+> $ php artisan make:transformer App\\Book --includes=App\\User:author,App\\Comment:comments:true
+> ```
 
 A generated file will look like this:
 
@@ -210,14 +240,10 @@ class BookTransformer extends TransformerAbstract
      *
      * @var  array
      */
-    protected $availableIncludes = ['author', 'comments'];
-
-    /**
-     * List of resources to include automatically/always.
-     *
-     * @var  array
-     */
-    // protected $defaultIncludes = ['author', 'comments'];
+    protected $availableIncludes = [
+        'author', 
+        'comments'
+    ];
     
     /**
      * Transform single resource.
@@ -240,6 +266,7 @@ class BookTransformer extends TransformerAbstract
 
     /**
      * Include author.
+     * This method is used, when an API client request /v1/books?include=author
      *
      * @param  \App\Book $book
      * @param \League\Fractal\ParamBag|null $params
@@ -247,11 +274,15 @@ class BookTransformer extends TransformerAbstract
      */
     public function includeAuthor(Book $book, ParamBag $params = null)
     {
-        return $this->item($book->author, new \App\Transformers\UserTransformer($params));
-    }        
+        return $this->item(
+            $book->author, 
+            new \App\Transformers\UserTransformer($params)
+        );
+    }
     
     /**
      * Include comments.
+     * This method is used, when an API client request /v1/books??include=comments
      *
      * @param  \App\Book $book
      * @param  \League\Fractal\ParamBag|null $params
@@ -263,7 +294,11 @@ class BookTransformer extends TransformerAbstract
 
         $parsed = $transformer->getParsedParams();
 
-        $comments = $book->comments()->limit($parsed['limit'])->offset($parsed['offset'])->orderBy($parsed['sort'], $parsed['order'])->get();
+        $comments = $book->comments()
+            ->limit($parsed['limit'])
+            ->offset($parsed['offset'])
+            ->orderBy($parsed['sort'], $parsed['order'])
+            ->get();
 
         return $this->collection($comments, $transformer);
     }
@@ -271,9 +306,9 @@ class BookTransformer extends TransformerAbstract
 ```
 
 <a name="nesting"></a>
-## NESTING SUB-RESOURCES
+## 7. NESTING SUB-RESOURCES
 
-Try the following.
+An API client can request a resource with its sub-resource. The following example is requesting `authors` list. At the same time, it requests each author's `books` list. It also has additional parameters, which reads as 'I need total of 3 books for this author when ordered by recency without any skipping'.
 
 ```HTTP
 GET /authors?include=books:limit(3|0):sort(id|desc)
@@ -285,19 +320,20 @@ When including multiple sub resources,
 GET /authors?include[]=books:limit(2|0)&include[]=comments:sort(id|asc)
 
 # or alternatively
+
 GET /authors?include=books:limit(2|0),comments:sort(id|asc)
 ```
 
-In case of deep recursive nesting, use dot (.).
+In case of deep recursive nesting, use dot (`.`). In the following example, we assume the publisher model has relationship with somethingelse model.
 
 ```HTTP
 GET /books?include=author,publisher.somethingelse
 ```
 
 <a name="partial"></a>
-## PARTIAL RESPONSE
+## 8. PARTIAL RESPONSE
 
-Try the following.
+An API client can designate the fields that s/he wants to receive. The following example illustrates the situation where the client wants to receive only id, name, and email fields, with sub-resource of the author's book collection. The client also limits the fields of sub-resource as id, title, and published_at.
 
 ```HTTP
 GET /authors?fields=id,name,email&include=books:limit(3|0):fields(id|title|published_at)
@@ -306,11 +342,11 @@ GET /authors?fields=id,name,email&include=books:limit(3|0):fields(id|title|publi
 Note that, for parent resource, we used comma (,) as the field delimiter , while pipe (|) was used for children.  
 
 <a name="method"></a>
-## APIs
+## 9. APIs
 
 The following is the full list of response methods that `Appkr\Api\Http\Response` provides. Really handy when making a json response in a controller.
 
-### `Appkr\Api\Response` - Available Methods
+### 9.1. `Appkr\Api\Response` - Available Methods
 
 ```php
 // Generic response. 
@@ -404,7 +440,7 @@ setHeaders(array $headers);
 setMeta(array $meta);
 ```
 
-### `Appkr\Api\TransformerAbstract` - Available Methods
+### 9.2. `Appkr\Api\TransformerAbstract` - Available Methods
 
 ```php
 // We can apply this method against an instantiated transformer,
@@ -414,17 +450,17 @@ setMeta(array $meta);
 //      $transformer = new BookTransformer;
 //      $transformer->get(); 
 // Will produce all parsed parameters:
-//      [
-//          'limit'  => 2 // if not given default value at config
-//          'offset' => 0 // if not given default value at config
-//          'sort'   => 'created_at' // if given, given value
-//          'order'  => 'desc' // if given, given value
-//          'fields' => ['id', 'title', 'published_at'] // if not given, null
-//      ]
+//      // [
+//      //     'limit'  => 2 // if not given default value at config
+//      //     'offset' => 0 // if not given default value at config
+//      //     'sort'   => 'created_at' // if given, given value
+//      //     'order'  => 'desc' // if given, given value
+//      //     'fields' => ['id', 'title', 'published_at'] // if not given, null
+//      // ]
 // Alternatively we can pass a key. 
 //      $transformer->get('limit');
 // Will produce limit parameter:
-//      2
+//      // 2
 get(string|null $key)
 
 // Exactly does the same function as get.
@@ -432,7 +468,7 @@ get(string|null $key)
 getParsedParams(string|null $key)
 ```
 
-### `helpers.php` - Available Methods
+### 9.3. `helpers.php` - Available Functions
 
 ```php
 // Make JSON response
@@ -457,62 +493,65 @@ is_delete_request();
 ```
 
 <a name="example"></a>
-## BUNDLED EXAMPLE
+## 10. BUNDLED EXAMPLE
 
-Easiest way to learn this package and what RESTful is, I bet. The package is bundled with a set of example. It includes:
+The package is bundled with a set of example that follows the best practices. It includes:
 
-- Database migrations and seeder
-- routes definition, Eloquent Model and corresponding Controller
-- FormRequest *(Laravel only)*
-- Transformer
-- Integration Test
+-   Database migrations and seeder
+-   routes definition, Eloquent Model and corresponding Controller
+-   FormRequest *(Laravel only)*
+-   Transformer
+-   Integration Test
 
 Follow the guide to activate and test the example.
 
-### **Step #1:** Activate examples
+### 10.1. Activate examples
+
+Uncomment the line.
 
 ```php
-// Uncomment the line at vendor/appkr/api/src/ApiServiceProvider.php
+// vendor/appkr/api/src/ApiServiceProvider.php
 
 $this->publishExamples();
 ```
 
-### **Step #2:** Migrate and seed tables
+### 10.2. Migrate and seed tables
 
-```bash
-# Migrate/seed tables at a console
-# In order not to pollute, providing --database="name_of_connection" is recommended.
-# We assume the test database driver name is 'sqlite'.
+Do the following to make test table and seed test data. Highly recommend to use SQLite, to avoid polluting the main database of yours.
 
+```sh
 $ php artisan migrate --path="vendor/appkr/api/src/example/database/migrations" --database="sqlite"
 $ php artisan db:seed --class="Appkr\Api\Example\DatabaseSeeder" --database="sqlite"
 ```
 
-### **Step #3:** Boot up a server and open at a browser
+### 10.3. See it works
 
-```bash
-# Boot up a server
+Boot up a server.
+
+```sh
 $ php artisan serve
 ```
 
-Head on to `/v1/books`, and you should see a well formatted json response. Try each route to get accustomed to, such as `/v1/books=include=authors`, `/v1/authors=include=books:limit(2|0):order(id|desc)`, `...`.
+Head on to `GET /v1/books`, and you should see a well formatted json response. Try each route to get accustomed to, such as `/v1/books=include=authors`, `/v1/authors=include=books:limit(2|0):order(id|desc)`.
 
 ![](resources/appkr-api-example-img-01.png)
 
-### **Step #4:** [OPTIONAL] Run integration test
+### 10.4. [OPTIONAL] Run integration test
 
-```bash
+```sh
 # Laravel
-$ phpunit vendor/appkr/api/src/example/BookApiTestForLaravel.php
-
-# Lumen
-$ phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
+$ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLaravel.php
 ```
 
-**`Note`** _If you finished evaluating the example, don't forget to rollback the migration and re-comment the unnecessary lines at `ApiServiceProvider`._
+```sh
+# Lumen
+$ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
+```
 
----
+> **`Note`** 
+> 
+> If you finished evaluating the example, don't forget to rollback the migration and re-comment the unnecessary lines at `ApiServiceProvider`.
 
-##LICENSE & CONTRIBUTION
+## 11. LICENSE & CONTRIBUTION
 
-This package follows [MIT License](https://raw.githubusercontent.com/appkr/api/master/LICENSE). Issues and PRs are always welcomed.
+[MIT License](https://raw.githubusercontent.com/appkr/api/master/LICENSE). Issues and PRs are always welcomed.

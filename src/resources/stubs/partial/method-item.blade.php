@@ -7,5 +7,8 @@
      */
     public function {{ $include->method }}({{ $subject->basename }} ${{ $subject->object }}, ParamBag $params = null)
     {
-        return $this->item(${{ $subject->object }}->{{ $include->relationship }}, new {{ $include->transformer }}($params));
+        return $this->item(
+            ${{ $subject->object }}->{{ $include->relationship }},
+            new {{ $include->transformer }}($params)
+        );
     }

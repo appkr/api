@@ -3,12 +3,13 @@
   "description": "RESTful HTTP API dev tool for Laravel or Lumen based project",
   "keywords": [
     "laravel",
+    "restful api",
     "fractal"
   ],
   "license": "MIT",
   "authors": [
     {
-      "name": "Appkr",
+      "name": "appkr",
       "email": "juwonkim@me.com"
     }
   ],

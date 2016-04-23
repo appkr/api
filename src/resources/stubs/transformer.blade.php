@@ -8,10 +8,8 @@ use League\Fractal\ParamBag;
 
 class {{ $subject->transformer }} extends TransformerAbstract
 {
-@if($includes->count() > 0)
-    @include('api::partial.property')
-@endif
 
+@if($includes->count() > 0) @include('api::partial.property') @endif
     /**
      * Transform single resource.
      *
@@ -38,11 +36,7 @@ class {{ $subject->transformer }} extends TransformerAbstract
     }
 
 @forelse($includes as $include)
-  @if ($include->type == 'collection')
-    @include('api::partial.method-collection')
-  @else
-    @include('api::partial.method-item')
-  @endif
+  @if ($include->type == 'collection') @include('api::partial.method-collection') @else @include('api::partial.method-item') @endif
 @empty
 @endforelse
 }

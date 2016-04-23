@@ -5,11 +5,15 @@
      *
      * @var array
      */
-    protected $availableIncludes = [{!! "'" . $includes->implode('relationship', "', '") ."'" !!}];
+    protected $availableIncludes = [
+        {!! "'" . $includes->implode('relationship', "',\n'") ."'" !!}
+    ];
 
     /**
      * List of resources to be included always.
      *
      * @var array
      */
-    // protected $defaultIncludes = [{!! "'" . $includes->implode('relationship', "', '") ."'" !!}];
+//    protected $defaultIncludes = [
+//        {!! "'" . $includes->implode('relationship', "','") ."'" !!}
+//    ];

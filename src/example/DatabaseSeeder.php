@@ -15,7 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        Eloquent::unguard();
+        if (! is_52()) {
+            Eloquent::unguard();
+        }
+
         $faker = Faker::create();
 
         // Seeding authors table
@@ -48,7 +51,9 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        Eloquent::regard();
+        if (! is_52()) {
+            Eloquent::regard();
+        }
 
         $this->command->line("<info>Seeded:</info> books table");
     }
