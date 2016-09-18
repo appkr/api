@@ -33,9 +33,13 @@ class ApiServiceProvider extends ServiceProvider
             $config = $app['config'];
 
             $fractal = new Fractal;
-            $fractal->setSerializer(app($config->get('api.serializer')));
+            $fractal->setSerializer(
+                app($config->get('api.serializer'))
+            );
 
-            if ($includes = $app['request']->input($config->get('api.include.key'))) {
+            $includes = $app['request']->input($config->get('api.include.key'));
+
+            if ($includes) {
                 $fractal->parseIncludes($includes);
             }
 
@@ -91,7 +95,7 @@ class ApiServiceProvider extends ServiceProvider
     {
         $this->publishes([
             realpath(__DIR__ . '/./example/database/migrations') => database_path('migrations'),
-            realpath(__DIR__ . '/./example/AppkrApiFixture.php')  => database_path('factories'),
+            realpath(__DIR__ . '/./example/factories/factories')  => database_path('factories'),
         ]);
 
         if (is_laravel()) {
@@ -110,6 +114,7 @@ class ApiServiceProvider extends ServiceProvider
         $this->app->singleton('api.make.transformer', function ($app) {
             return $app['Appkr\Api\Commands\MakeTransformerCommand'];
         });
+
         $this->commands('api.make.transformer');
     }
 }

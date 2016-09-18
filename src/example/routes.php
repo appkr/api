@@ -1,14 +1,13 @@
 <?php
 
-Route::group(['prefix' => 'v1'], function () {
-
+Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
     Route::get('/', [
-        'as'   => 'v1.home',
+        'as'   => 'home',
         'uses' => Appkr\Api\Example\LinkController::class . '@index',
     ]);
 
     Route::get('doc', [
-        'as' => 'v1.doc',
+        'as' => 'doc',
         function () {
             return "Placeholder for v1 api documentation page.";
         },
@@ -21,7 +20,7 @@ Route::group(['prefix' => 'v1'], function () {
     );
 
     Route::get('authors/{id}/books', [
-        'as'   => 'v1.authors.books',
+        'as'   => 'authors.books',
         'uses' => Appkr\Api\Example\BooksController::class . '@index',
     ]);
 
