@@ -8,7 +8,7 @@ if (! function_exists('is_laravel')) {
      */
     function is_laravel()
     {
-        return file_exists(base_path('vendor/laravel/framework/readme.md'));
+        return app() instanceof Illuminate\Foundation\Application;
     }
 }
 
@@ -20,7 +20,7 @@ if (! function_exists('is_lumen')) {
      */
     function is_lumen()
     {
-        return file_exists(base_path('vendor/laravel/lumen-framework/readme.md'));
+        return app() instanceof Laravel\Lumen\Application;
     }
 }
 
