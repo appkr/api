@@ -15,7 +15,7 @@
   ],
   "require": {
     "php": ">=5.5.9",
-    "league/fractal": "0.13.*",
+    "league/fractal": "0.14.*",
     "shrikeh/teapot": "1.0.*"
   },
   "require-dev": {
