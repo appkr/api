@@ -49,8 +49,8 @@ class Response
     /**
      * Create new Response class.
      *
-     * @param \League\Fractal\Manager         $fractal
-     * @param \Illuminate\Http\Request        $request
+     * @param \League\Fractal\Manager $fractal
+     * @param \Illuminate\Http\Request $request
      * @param \Appkr\Api\Http\ResponseFactory $response
      */
     public function __construct(Fractal $fractal, Request $request, ResponseFactory $response)
@@ -100,8 +100,8 @@ class Response
      * Respond collection of resources.
      *
      * @param \Illuminate\Database\Eloquent\Collection $collection
-     * @param null                                     $transformer
-     * @param string|null                              $resourceKey
+     * @param null $transformer
+     * @param string|null $resourceKey
      * @return \Illuminate\Contracts\Http\Response
      */
     public function withCollection(EloquentCollection $collection, $transformer = null, $resourceKey = null)
@@ -115,8 +115,8 @@ class Response
      * Create FractalCollection payload.
      *
      * @param \Illuminate\Database\Eloquent\Collection $collection
-     * @param null                                     $transformer
-     * @param string|null                              $resourceKey
+     * @param null $transformer
+     * @param string|null $resourceKey
      * @return mixed
      */
     public function getCollection(EloquentCollection $collection, $transformer = null, $resourceKey = null)
@@ -140,7 +140,7 @@ class Response
      *
      * @param \Illuminate\Database\Eloquent\Model $model
      * @param                                     $transformer
-     * @param string|null                         $resourceKey
+     * @param string|null $resourceKey
      * @return \Illuminate\Contracts\Http\Response
      */
     public function withItem(EloquentModel $model, $transformer = null, $resourceKey = null)
@@ -154,8 +154,8 @@ class Response
      * Create FractalItem payload.
      *
      * @param \Illuminate\Database\Eloquent\Model $model
-     * @param null                                $transformer
-     * @param string|null                         $resourceKey
+     * @param null $transformer
+     * @param string|null $resourceKey
      * @return mixed
      */
     public function getItem(EloquentModel $model, $transformer = null, $resourceKey = null)
@@ -179,7 +179,7 @@ class Response
      *
      * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator
      * @param                                                       $transformer
-     * @param string|null                                           $resourceKey
+     * @param string|null $resourceKey
      * @return \Illuminate\Contracts\Http\Response
      */
     public function withPagination(LengthAwarePaginator $paginator, $transformer = null, $resourceKey = null)
@@ -193,8 +193,8 @@ class Response
      * Create FractalCollection payload with pagination.
      *
      * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator
-     * @param null                                                  $transformer
-     * @param string|null                                           $resourceKey
+     * @param null $transformer
+     * @param string|null $resourceKey
      * @return mixed
      */
     public function getPagination(LengthAwarePaginator $paginator, $transformer = null, $resourceKey = null)
@@ -297,8 +297,8 @@ class Response
         if ($message instanceof \Exception) {
             if (config('api.debug') === true) {
                 $format['debug'] = [
-                    'line'  => $message->getLine(),
-                    'file'  => $message->getFile(),
+                    'line' => $message->getLine(),
+                    'file' => $message->getFile(),
                     'class' => get_class($message),
                     'trace' => explode("\n", $message->getTraceAsString()),
                 ];
@@ -534,14 +534,16 @@ class Response
     {
         $replace = [
             ':message' => $message,
-            ':code'    => $this->getStatusCode(),
+            ':code' => $this->getStatusCode(),
         ];
 
-        array_walk_recursive($format, function (&$value, $key) use ($replace) {
+        array_walk_recursive(
+            $format, function (&$value, $key) use ($replace) {
             if (isset($replace[$value])) {
                 $value = $replace[$value];
             }
-        });
+        }
+        );
 
         return $format;
     }
@@ -612,7 +614,7 @@ class Response
      * Dynamically call all other methods on the response object.
      *
      * @param string $method
-     * @param array  $parameters
+     * @param array $parameters
      * @return mixed
      */
     public function __call($method, $parameters)

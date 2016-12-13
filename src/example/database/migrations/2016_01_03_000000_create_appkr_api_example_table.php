@@ -25,7 +25,7 @@ class CreateAppkrApiExampleTable extends Migration
             $table->date('published_at')->nullable();
             $table->integer('author_id')->unsigned()->index();
             $table->text('description')->nullable();
-            $table->enum('out_of_print', [0, 1])->default(0);
+            $table->boolean('out_of_print')->default(false);
             $table->timestamps();
         });
     }
@@ -40,5 +40,4 @@ class CreateAppkrApiExampleTable extends Migration
         Schema::drop('authors');
         Schema::drop('books');
     }
-
 }

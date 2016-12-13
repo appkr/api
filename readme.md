@@ -16,10 +16,10 @@
 -   [5. CONFIG](#config)
 -   [6. TRANSFORMER](#transformer)
 -   [7. NESTING SUB-RESOURCE](#nesting)
--   [8. PARTIAL RESPONSE](#partial)
--   [9. APIs](#method)
--   [10. BUNDLED EXAMPLE](#example)
--   LICENSE & CONTRIBUTION
+-   [8. APIs](#method)
+-   [9. BUNDLED EXAMPLE](#example)
+-   10. LICENSE & CONTRIBUTION
+-   11. CHANGELOG
 
 ---
 
@@ -45,7 +45,7 @@ A lightweight RESTful API builder for Laravel or/and Lumen project.
 Define RESTful resource route in Laravel way.
 
 ```php
-// app/Http/routes.php
+<?php // app/Http/routes.php OR routes/web.php OR routes/api.php
 
 Route::group(['prefix' => 'v1'], function () {
     Route::resource(
@@ -58,8 +58,8 @@ Route::group(['prefix' => 'v1'], function () {
 
 Lumen doesn't support RESTful resource route. You have to define them one by one.
 
-```
-// app/Http/routes.php
+```php
+<?php // app/Http/routes.php OR routes/web.php OR routes/api.php
 
 $app->group(['prefix' => 'v1'], function ($app) {
     $app->get('books', [
@@ -90,9 +90,7 @@ $app->group(['prefix' => 'v1'], function ($app) {
 The subsequent code block is the controller logic for `/v1/books/{id}` endpoint. Note the use cases of `json()` helper and transformer on the following code block.
 
 ```php
-// app/Http/Controllers/BooksController.php
-
-<?php
+<?php // app/Http/Controllers/BooksController.php
 
 namespace App\Http\Controllers\V1;
 
@@ -159,15 +157,15 @@ $ composer require "appkr/api: 1.*"
 ### 4.2. Add the service provider.
 
 ```php
-// config/app.php (Laravel)
+<?php // config/app.php (Laravel)
 
-'providers'=> [
+'providers' => [
     Appkr\Api\ApiServiceProvider::class,
-]
+];
 ```
 
 ```php
-// boostrap/app.php (Lumen)
+<?php // boostrap/app.php (Lumen)
 
 $app->register(Appkr\Api\ApiServiceProvider::class);
 ```
@@ -179,7 +177,16 @@ $app->register(Appkr\Api\ApiServiceProvider::class);
 $ php artisan vendor:publish --provider="Appkr\Api\ApiServiceProvider"
 ```
 
-The configuration file is located at `config/api.php`.
+The configuration file is located at `config/api.php`. 
+
+In Lumen we can manually create `config/api.php` file, and then activate the configuration at `bootstrap/app.php` like the following.
+
+```php
+<?php // bootstrap/app.php (Lumen)
+
+$app->register(Appkr\Api\ApiServiceProvider::class);
+$app->configure('api');
+```
 
 Done !
 
@@ -223,7 +230,8 @@ $ php artisan make:transformer {subject} {--includes=}
 A generated file will look like this:
 
 ```php
-<?php
+<?php // app/Transformers/BookTransformer.php
+
 namespace App\Transformers;
 
 use App\Book;
@@ -235,8 +243,6 @@ class BookTransformer extends TransformerAbstract
 {
     /**
      * List of resources possible to include using url query string.
-     * e.g. collection case -> ?include=comments:limit(5|1):order(created_at|desc)
-     *      item case       -> ?include=author
      *
      * @var  array
      */
@@ -263,7 +269,7 @@ class BookTransformer extends TransformerAbstract
             ],
         ];
     }
-
+    
     /**
      * Include author.
      * This method is used, when an API client request /v1/books?include=author
@@ -292,12 +298,10 @@ class BookTransformer extends TransformerAbstract
     {
         $transformer = new \App\Transformers\CommentTransformer($params);
 
-        $parsed = $transformer->getParsedParams();
-
         $comments = $book->comments()
-            ->limit($parsed['limit'])
-            ->offset($parsed['offset'])
-            ->orderBy($parsed['sort'], $parsed['order'])
+            ->limit($transformer->getLimit())
+            ->offset($transformer->getOffset())
+            ->orderBy($transformer->getSortKey(), $transformer->getSortDirection())
             ->get();
 
         return $this->collection($comments, $transformer);
@@ -330,25 +334,16 @@ In case of deep recursive nesting, use dot (`.`). In the following example, we a
 GET /books?include=author,publisher.somethingelse
 ```
 
-<a name="partial"></a>
-## 8. PARTIAL RESPONSE
-
-An API client can designate the fields that s/he wants to receive. The following example illustrates the situation where the client wants to receive only id, name, and email fields, with sub-resource of the author's book collection. The client also limits the fields of sub-resource as id, title, and published_at.
-
-```HTTP
-GET /authors?fields=id,name,email&include=books:limit(3|0):fields(id|title|published_at)
-```
-
-Note that, for parent resource, we used comma (,) as the field delimiter , while pipe (|) was used for children.  
-
 <a name="method"></a>
-## 9. APIs
+## 8. APIs
 
 The following is the full list of response methods that `Appkr\Api\Http\Response` provides. Really handy when making a json response in a controller.
 
-### 9.1. `Appkr\Api\Response` - Available Methods
+### 8.1. `Appkr\Api\Response` - Available Methods
 
 ```php
+<?php
+
 // Generic response. 
 // If valid callback parameter is provided, jsonp response can be provided.
 // This is a very base method. All other responses are utilizing this.
@@ -440,13 +435,15 @@ setHeaders(array $headers);
 setMeta(array $meta);
 ```
 
-### 9.2. `Appkr\Api\TransformerAbstract` - Available Methods
+### 8.2. `Appkr\Api\TransformerAbstract` - Available Methods
 
 ```php
+<?php
+
 // We can apply this method against an instantiated transformer,
 // to get the parsed query parameters that belongs only to the current resource.
 // 
-// e.g. GET /v1/author?include[]=books:limit(2|0):fields(id|title|published_at)&include[]=comments:sort(id|asc)
+// e.g. GET /v1/author?include[]=books:limit(2|0)&include[]=comments:sort(id|asc)
 //      $transformer = new BookTransformer;
 //      $transformer->get(); 
 // Will produce all parsed parameters:
@@ -455,7 +452,6 @@ setMeta(array $meta);
 //      //     'offset' => 0 // if not given default value at config
 //      //     'sort'   => 'created_at' // if given, given value
 //      //     'order'  => 'desc' // if given, given value
-//      //     'fields' => ['id', 'title', 'published_at'] // if not given, null
 //      // ]
 // Alternatively we can pass a key. 
 //      $transformer->get('limit');
@@ -468,9 +464,11 @@ get(string|null $key)
 getParsedParams(string|null $key)
 ```
 
-### 9.3. `helpers.php` - Available Functions
+### 8.3. `helpers.php` - Available Functions
 
 ```php
+<?php
+
 // Make JSON response
 // Returns Appkr\Api\Http\Response object if no argument is given,
 // from there you can chain any public apis that are listed above.
@@ -493,7 +491,7 @@ is_delete_request();
 ```
 
 <a name="example"></a>
-## 10. BUNDLED EXAMPLE
+## 9. BUNDLED EXAMPLE
 
 The package is bundled with a set of example that follows the best practices. It includes:
 
@@ -505,17 +503,17 @@ The package is bundled with a set of example that follows the best practices. It
 
 Follow the guide to activate and test the example.
 
-### 10.1. Activate examples
+### 9.1. Activate examples
 
 Uncomment the line.
 
 ```php
-// vendor/appkr/api/src/ApiServiceProvider.php
+<?php // vendor/appkr/api/src/ApiServiceProvider.php
 
 $this->publishExamples();
 ```
 
-### 10.2. Migrate and seed tables
+### 9.2. Migrate and seed tables
 
 Do the following to make test table and seed test data. Highly recommend to use SQLite, to avoid polluting the main database of yours.
 
@@ -524,7 +522,7 @@ $ php artisan migrate --path="vendor/appkr/api/src/example/database/migrations" 
 $ php artisan db:seed --class="Appkr\Api\Example\DatabaseSeeder" --database="sqlite"
 ```
 
-### 10.3. See it works
+### 9.3. See it works
 
 Boot up a server.
 
@@ -536,7 +534,7 @@ Head on to `GET /v1/books`, and you should see a well formatted json response. T
 
 ![](resources/appkr-api-example-img-01.png)
 
-### 10.4. [OPTIONAL] Run integration test
+### 9.4. [OPTIONAL] Run integration test
 
 ```sh
 # Laravel
@@ -552,6 +550,18 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 > 
 > If you finished evaluating the example, don't forget to rollback the migration and re-comment the unnecessary lines at `ApiServiceProvider`.
 
-## 11. LICENSE & CONTRIBUTION
+## 10. LICENSE & CONTRIBUTION
 
 [MIT License](https://raw.githubusercontent.com/appkr/api/master/LICENSE). Issues and PRs are always welcomed.
+
+## 11. CHANGELOG
+
+### v2.0.0
+
+- `TransformerAbstract`'s API changed.
+- Partial response by query string feature removed. Instead we can explicitly set the list of attributes to respond in a Transformer's `$visible` or `$hidden` property.
+
+### v1.1.0 [buggy]
+
+- Field grouping feature added for partial response conveniences.
+- `TransformerAbstract` now throws `UnexpectedValueException` instead of `Exception`, when params or values passed by API client are not acceptable.

@@ -10,7 +10,7 @@ class BooksRequest extends Request
      * @var array
      */
     protected $rules = [
-        'title'       => 'required|min:2',
+        'title' => 'required|min:2',
         'description' => 'min:2',
     ];
 

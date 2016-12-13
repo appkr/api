@@ -53,7 +53,7 @@ class MakeTransformerCommand extends Command
 
     /**
      * @param \Illuminate\Filesystem\Filesystem $file
-     * @param \Illuminate\View\Factory          $view
+     * @param \Illuminate\View\Factory $view
      */
     public function __construct(Filesystem $file, View $view)
     {
@@ -105,9 +105,11 @@ class MakeTransformerCommand extends Command
      */
     protected function buildClassContent()
     {
-        return $this->view->make('api::transformer', [
-            'subject' => $this->subject,
-            'includes' => $this->includes,
-        ]);
+        return $this->view->make(
+            'api::transformer', [
+                'subject' => $this->subject,
+                'includes' => $this->includes,
+            ]
+        );
     }
 }

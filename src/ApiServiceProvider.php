@@ -50,7 +50,7 @@ class ApiServiceProvider extends ServiceProvider
 
         $this->app->bind('api.response', Response::class);
 
-        $this->registerMakeTransfomerCommand();
+        $this->registerMakeTransformerCommand();
     }
 
     /**
@@ -109,7 +109,7 @@ class ApiServiceProvider extends ServiceProvider
     /**
      * Register make:transformer command.
      */
-    protected function registerMakeTransfomerCommand()
+    protected function registerMakeTransformerCommand()
     {
         $this->app->singleton('api.make.transformer', function ($app) {
             return $app['Appkr\Api\Commands\MakeTransformerCommand'];

@@ -2,7 +2,7 @@
 
 Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
     Route::get('/', [
-        'as'   => 'home',
+        'as' => 'home',
         'uses' => Appkr\Api\Example\LinkController::class . '@index',
     ]);
 
@@ -13,19 +13,17 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         },
     ]);
 
-    Route::resource(
-        'books',
+    Route::resource('books',
         Appkr\Api\Example\BooksController::class,
         ['except' => ['create', 'edit']]
     );
 
     Route::get('authors/{id}/books', [
-        'as'   => 'authors.books',
+        'as' => 'authors.books',
         'uses' => Appkr\Api\Example\BooksController::class . '@index',
     ]);
 
-    Route::resource(
-        'authors',
+    Route::resource('authors',
         Appkr\Api\Example\AuthorsController::class,
         ['only' => ['index', 'show']]
     );

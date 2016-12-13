@@ -14,7 +14,6 @@
 -   [5. 설정](#config)
 -   [6. 트랜스포머](#transformer)
 -   [7. 하위 리소스 포함](#nesting)
--   [8. 응답 필드 선택](#partial)
 -   [9. API](#method)
 -   [10. 포함된 예제 프로젝트](#example)
 -   11. 라이선스와 기여
@@ -43,7 +42,7 @@
 평상시 하던대로, 라라벨의 RESTful 리소스 라우트로 API 엔트포인트를 만든다.
 
 ```php
-// app/Http/routes.php
+<?php // app/Http/routes.php OR routes/web.php OR routes/api.php
 
 Route::group(['prefix' => 'v1'], function () {
     Route::resource(
@@ -57,7 +56,7 @@ Route::group(['prefix' => 'v1'], function () {
 루멘은 RESTful 리소스 라우트가 없다. 직접 하나씩 써야 한다. 
 
 ```php
-// app/Http/routes.php
+<?php // app/Http/routes.php OR routes/web.php OR routes/api.php
 
 $app->group(['prefix' => 'v1'], function ($app) {
     $app->get('books', [
@@ -88,9 +87,7 @@ $app->group(['prefix' => 'v1'], function ($app) {
 다음은 `/v1/books/{id}` 엔드포인트를 처리하는 컨트롤러 로직이다. `json()` helper와 트랜스포머의 사용법을 유심히 보라.
 
 ```php
-// app/Http/Controllers/BooksController.php
-
-<?php
+<?php // app/Http/Controllers/BooksController.php
 
 namespace App\Http\Controllers\V1;
 
@@ -157,7 +154,7 @@ $ composer require "appkr/api: 1.*"
 ### 4.2. 서비스 프로바이더 추가
 
 ```php
-// config/app.php (Laravel)
+<?php // config/app.php (Laravel)
 
 'providers'=> [
     Appkr\Api\ApiServiceProvider::class,
@@ -165,7 +162,7 @@ $ composer require "appkr/api: 1.*"
 ```
 
 ```php
-// boostrap/app.php (Lumen)
+<?php // boostrap/app.php (Lumen)
 
 $app->register(Appkr\Api\ApiServiceProvider::class);
 ```
@@ -178,6 +175,15 @@ $ php artisan vendor:publish --provider="Appkr\Api\ApiServiceProvider"
 ```
 
 복사한 설정 파일은 `config/api.php`에서 찾을 수 있다.
+
+루멘 프로젝트에서는 직접 `config/api.php` 파일을 만들고, `bootstrap/app.php` 파일에 다음 엔트리를 추가해서 활성화한다.
+
+```php
+<?php // bootstrap/app.php (Lumen)
+
+$app->register(Appkr\Api\ApiServiceProvider::class);
+$app->configure('api');
+```
 
 끝 !
 
@@ -223,7 +229,8 @@ $ php artisan make:transformer {subject} {--includes=}
 자동 생성된 파일은 다음과 같다. 역시 인라인 주석이 전부 달려 있으니 읽어 보기 바란다.
 
 ```php
-<?php
+<?php // app/Transformers/BookTransformer.php
+
 namespace App\Transformers;
 
 use App\Book;
@@ -235,8 +242,6 @@ class BookTransformer extends TransformerAbstract
 {
     /**
      * URL 쿼리스트링으로 이용해서 중첩 요청할 수 있는 하위 리소스 (Book 모델에서 정의한 관계).
-     * e.g. collection case -> ?include=comments:limit(5|1):order(created_at|desc)
-     *      item case       -> ?include=author
      *
      * @var  array
      */
@@ -244,7 +249,7 @@ class BookTransformer extends TransformerAbstract
         'author', 
         'comments',
     ];
-
+    
     /**
      * Transform single resource.
      *
@@ -292,12 +297,10 @@ class BookTransformer extends TransformerAbstract
     {
         $transformer = new \App\Transformers\CommentTransformer($params);
 
-        $parsed = $transformer->getParsedParams();
-
         $comments = $book->comments()
-            ->limit($parsed['limit'])
-            ->offset($parsed['offset'])
-            ->orderBy($parsed['sort'], $parsed['order'])
+            ->limit($transformer->getLimit())
+            ->offset($transformer->getOffset())
+            ->orderBy($transformer->getSortKey(), $transformer->getSortDirection())
             ->get();
 
         return $this->collection($comments, $transformer);
@@ -330,27 +333,16 @@ GET /authors?include=books:limit(2|0),comments:sort(id|asc)
 GET /books?include=author,publisher.somethingelse
 ```
 
-<a name="partial"></a>
-## 8. 응답 필드 선택
-
-클라이언트가 응답으로 받고 싶은 필드를 정의한다.
-
-다음 예제는 저자의 id, name, email 정보만 받겠다는 요청이다. 그리고, 해당 저자의 책 목록 3건을 같이 요청하는데, id, title, published_at 필드만 요청하고 있다.
-
-```HTTP
-GET /authors?fields=id,name,email&include=books:limit(3|0):fields(id|title|published_at)
-```
-
-하위 리소스 요청에서의 필드 구분자는 콤마대신 파이프(`|`) 기호를 쓴다.
-
 <a name="method"></a>
-## 9. APIs
+## 8. APIs
 
 `Appkr\Api\Http\Response` 클래스의 메서드 및 helper 함수 목록이다. 이 함수와 메서드들을 이용해서 컨틀롤러에서 JSON 응답을 반환할 수 있다.
 
-### 9.1. `Appkr\Api\Response` 메서드
+### 8.1. `Appkr\Api\Response` 메서드
 
 ```php
+<?php
+
 // JSON을 응답한다. 
 // 이 클래스의 모든 메서드가 이 메서드를 사용하여 최종 JSON 응답을 반환한다.
 respond(array $payload);
@@ -434,13 +426,15 @@ setHeaders(array $headers);
 setMeta(array $meta);
 ```
 
-### 9.2. `Appkr\Api\TransformerAbstract` 메서드
+### 8.2. `Appkr\Api\TransformerAbstract` 메서드
 
 ```php
+<?php 
+
 // 트랜스포머가 해석한 URL 쿼리 파라미터의 값을 얻을 수 있다.
 // 예제는 BookTransformer의 코드이므로, books 리소스에 대한 쿼리 파라미터만 취급한다. 
 // 
-// e.g. GET /v1/author?include[]=books:limit(2|0):fields(id|title|published_at)&include[]=comments:sort(id|asc)
+// e.g. GET /v1/author?include[]=books:limit(2|0)&include[]=comments:sort(id|asc)
 //      $transformer = new BookTransformer;
 //      $transformer->get(); 
 // 
@@ -449,7 +443,6 @@ setMeta(array $meta);
 //      //     'offset' => 0
 //      //     'sort'   => 'created_at'
 //      //     'order'  => 'desc'
-//      //     'fields' => ['id', 'title', 'published_at']
 //      // ]
 //
 // get() 메서드 안에 쿼리 필드 이름을 넣어서 하나의 값만 얻을 수도 있다. 
@@ -462,9 +455,11 @@ get(string|null $key)
 getParsedParams(string|null $key)
 ```
 
-### 9.3. `helpers.php`
+### 8.3. `helpers.php`
 
 ```php
+<?php 
+
 // 인자를 넘기면 JSON 응답을 만든다.
 // 인자가 없으면 Appkr\Api\Http\Response 인스턴스를 반환한다.
 json(array|null $payload)
@@ -486,7 +481,7 @@ is_delete_request();
 ```
 
 <a name="example"></a>
-## 10. 포함된 예제 프로젝트
+## 9. 포함된 예제 프로젝트
 
 이 컴포넌트는 RESTful API 모범 사례를 담은 예제 프로젝트를 담고 있다. 다음은 포함된 내용이다.
 
@@ -498,17 +493,17 @@ is_delete_request();
 
 예제 프로젝트를 사용하려면 다음 가이드를 따른다.
 
-### 10.1. 예제 프로젝트 활성화
+### 9.1. 예제 프로젝트 활성화
 
 파일을 열어 다음 주석을 제거한다.
 
 ```php
-// vendor/appkr/api/src/ApiServiceProvider.php
+<?php // vendor/appkr/api/src/ApiServiceProvider.php
 
 $this->publishExamples();
 ```
 
-### 10.2. 마이그레이션과 시딩
+### 9.2. 마이그레이션과 시딩
 
 콘솔에서 다음 명령을 수행한다. 현재 프로젝트의 기본 DB를 오염시키지 않기 위해서 SQLite를 쓸 것을 권장한다.
 
@@ -517,7 +512,7 @@ $ php artisan migrate --path="vendor/appkr/api/src/example/database/migrations" 
 $ php artisan db:seed --class="Appkr\Api\Example\DatabaseSeeder" --database="sqlite"
 ```
 
-### 10.3. 확인
+### 9.3. 확인
 
 PHP 내장 웹 서버(또는 다른 웹 서버)를 실행한다.
 
@@ -529,7 +524,7 @@ $ php artisan serve
 
 ![](resources/appkr-api-example-img-01.png)
 
-### 10.4. [선택 사항] 통합 테스트
+### 9.4. [선택 사항] 통합 테스트
 
 ```sh
 # Laravel
@@ -545,6 +540,18 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 > 
 > 테스트가 끝났으면 1단계에서 풀었던 주석을 다시 살려둔다.
 
-## 11. 라이선스와 기여
+## 10. 라이선스와 기여
 
 [MIT ](https://raw.githubusercontent.com/appkr/api/master/LICENSE) 라이선스. 이슈와 PR은 언제든 환영한다.
+
+## 11. 변경 이력
+
+### v2.0.0
+
+- `TransformerAbstract` API 변경.
+- 응답 필드 선택 기능 제거. 대신 트랜스포머 클래스의 `$visible`, `$hidden` 프로퍼티로 명시적으로 응답에 포함할 필드를 지정할 수 있음.
+
+### v1.1.0 [buggy]
+
+- 응답 필드 선택을 편리하게 하기 위해서 필드 그룹핑 기능 추가. 
+- API 클라이언트가 제출한 파라미터 또는 값이 정확하지 않을 경우 `UnexpectedValueException`을 발생시킨다(기존에는 `Exception`).

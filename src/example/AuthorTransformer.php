@@ -17,6 +17,13 @@ class AuthorTransformer extends TransformerAbstract
     ];
 
     /**
+     * List of resources to automatically include.
+     *
+     * @var array
+     */
+    protected $defaultIncludes = [];
+
+    /**
      * Transform single resource.
      *
      * @param \Appkr\Api\Example\Author $author
@@ -25,22 +32,21 @@ class AuthorTransformer extends TransformerAbstract
     public function transform(Author $author)
     {
         $payload = [
-            'id'         => (int) $author->id,
-            'name'       => $author->name,
-            'email'      => $author->email,
-            //'created_at' => (int) $author->created_at->getTimestamp(),
+            'id' => (int) $author->id,
+            'name' => $author->name,
+            'email' => $author->email,
             'created_at' => $author->created_at->toIso8601String(),
-            'link'       => [
-                'rel'  => 'self',
+            'link' => [
+                'rel' => 'self',
                 'href' => route('v1.authors.show', [
-                    'id'      => $author->id,
+                    'id' => $author->id,
                     'include' => 'books',
                 ]),
             ],
-            'books'      => (int) $author->books->count(),
+            'books' => (int) $author->books->count(),
         ];
 
-        if ($fields = $this->getPartialFields()) {
+        if ($fields = $this->getFields()) {
             $payload = array_only($payload, $fields);
         }
 
@@ -50,17 +56,19 @@ class AuthorTransformer extends TransformerAbstract
     /**
      * Include books.
      *
-     * @param \Appkr\Api\Example\Author     $author
-     * @param \League\Fractal\ParamBag|null $params
+     * @param \Appkr\Api\Example\Author $author
+     * @param \League\Fractal\ParamBag|null $paramBag
      * @return \League\Fractal\Resource\Collection
      */
-    public function includeBooks(Author $author, ParamBag $params = null)
+    public function includeBooks(Author $author, ParamBag $paramBag = null)
     {
-        $transformer = new BookTransformer($params);
+        $transformer = new BookTransformer($paramBag);
 
-        $parsed = $transformer->getParsedParams();
-
-        $books = $author->books()->limit($parsed['limit'])->offset($parsed['offset'])->orderBy($parsed['sort'], $parsed['order'])->get();
+        $books = $author->books()
+            ->limit($transformer->getLimit())
+            ->offset($transformer->getOffset())
+            ->orderBy($transformer->getSortKey(), $transformer->getSortDirection())
+            ->get();
 
         return $this->collection($books, new BookTransformer);
     }

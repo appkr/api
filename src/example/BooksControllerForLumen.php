@@ -53,10 +53,12 @@ class BooksControllerForLumen extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'title'       => 'required|min:2',
+        $this->validate(
+            $request, [
+            'title' => 'required|min:2',
             'description' => 'min:2',
-        ]);
+        ]
+        );
 
         // Merging author_id for Demo purpose.
         // In real project we should use $request->user()->id instead.
@@ -97,15 +99,15 @@ class BooksControllerForLumen extends Controller
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param int                      $id
+     * @param int $id
      * @return \Illuminate\Contracts\Http\Response
      */
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'title'       => 'required|min:2',
+            'title' => 'required|min:2',
             'description' => 'min:2',
-            'deprecated'  => 'boolean',
+            'deprecated' => 'boolean',
         ]);
 
         $book = $this->model->findOrFail($id);
@@ -121,7 +123,7 @@ class BooksControllerForLumen extends Controller
      * Remove the specified resource from storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param  int                     $id
+     * @param  int $id
      * @return \Illuminate\Contracts\Http\Response
      */
     public function destroy(Request $request, $id)

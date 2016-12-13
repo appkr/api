@@ -2,19 +2,17 @@
      * Include {{ $include->relationship }}.
      *
      * @param \{{ $subject->model }} ${{ $subject->object }}
-     * @param \League\Fractal\ParamBag|null $params
+     * @param \League\Fractal\ParamBag|null $paramBag
      * @return \League\Fractal\Resource\Collection
      */
-    public function {{ $include->method }}({{ $subject->basename }} ${{ $subject->object }}, ParamBag $params = null)
+    public function {{ $include->method }}({{ $subject->basename }} ${{ $subject->object }}, ParamBag $paramBag = null)
     {
-        $transformer = new {{ $include->transformer }}($params);
-
-        $parsed = $transformer->getParsedParams();
+        $transformer = new {{ $include->transformer }}($paramBag);
 
         ${{ $include->relationship }} = ${{ $subject->object }}->{{ $include->relationship }}()
-            ->limit($parsed['limit'])
-            ->offset($parsed['offset'])
-            ->orderBy($parsed['sort'], $parsed['order'])
+            ->limit($transformer->getLimit())
+            ->offset($transformer->getOffset())
+            ->orderBy($transformer->getSortKey(), $transformer->getSortDirection())
             ->get();
 
         return $this->collection(${{ $include->relationship }}, $transformer);

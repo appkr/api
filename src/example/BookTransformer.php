@@ -21,9 +21,7 @@ class BookTransformer extends TransformerAbstract
      *
      * @var array
      */
-    //protected $defaultIncludes = [
-    //    'author'
-    //];
+    protected $defaultIncludes = [];
 
     /**
      * Transform single resource.
@@ -34,22 +32,24 @@ class BookTransformer extends TransformerAbstract
     public function transform(Book $book)
     {
         $payload = [
-            'id'           => (int) $book->id,
-            'title'        => $book->title,
-            'description'  => $book->description,
+            'id' => (int) $book->id,
+            'title' => $book->title,
+            'description' => $book->description,
             'out_of_print' => (bool) $book->out_of_print == 1,
             'published_yr' => property_exists($book, 'published_at') ? $book->published_at->format('Y') : 'unknown',
-            'link'         => [
-                'rel'  => 'self',
-                'href' => route('v1.books.show', [
-                    'id'      => $book->id,
+            'link' => [
+                'rel' => 'self',
+                'href' => route(
+                    'v1.books.show', [
+                    'id' => $book->id,
                     'include' => 'author',
-                ]),
+                ]
+                ),
             ],
-            'author'       => $book->author->name,
+            'author' => $book->author->name,
         ];
 
-        if ($fields = $this->getPartialFields()) {
+        if ($fields = $this->getFields()) {
             $payload = array_only($payload, $fields);
         }
 
@@ -59,12 +59,12 @@ class BookTransformer extends TransformerAbstract
     /**
      * Include Author.
      *
-     * @param \Appkr\Api\Example\Book  $book
-     * @param \League\Fractal\ParamBag $params
+     * @param \Appkr\Api\Example\Book $book
+     * @param \League\Fractal\ParamBag $paramBag
      * @return \League\Fractal\Resource\Item
      */
-    public function includeAuthor(Book $book, ParamBag $params = null)
+    public function includeAuthor(Book $book, ParamBag $paramBag = null)
     {
-        return $this->item($book->author, new AuthorTransformer($params));
+        return $this->item($book->author, new AuthorTransformer($paramBag));
     }
 }

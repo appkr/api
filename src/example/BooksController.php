@@ -20,7 +20,7 @@ class BooksController extends Controller
     {
         $this->model = $model;
         $this->meta = [
-            'version'       => 1,
+            'version' => 1,
             'documentation' => route('v1.doc'),
         ];
     }
@@ -69,16 +69,18 @@ class BooksController extends Controller
             ['author_id' => 1]
         );
 
-        if (! $book = $this->model->create($data)) {
+        if (!$book = $this->model->create($data)) {
             return json()->internalError('Failed to create !');
         }
 
         // respond created item with 201 status code and location header
         return json()
             ->setStatusCode(StatusCode::CREATED)
-            ->setHeaders([
-                'Location' => route('v1.books.show', ['id' => $book->id, 'include' => 'author']),
-            ])
+            ->setHeaders(
+                [
+                    'Location' => route('v1.books.show', ['id' => $book->id, 'include' => 'author']),
+                ]
+            )
             ->withItem(
                 $book,
                 new BookTransformer
@@ -110,14 +112,14 @@ class BooksController extends Controller
      * Update the specified resource in storage.
      *
      * @param \Appkr\Api\Example\BooksRequest $request
-     * @param int                              $id
+     * @param int $id
      * @return \Illuminate\Contracts\Http\Response
      */
     public function update(BooksRequest $request, $id)
     {
         $book = $this->model->findOrFail($id);
 
-        if (! $book->update($request->all())) {
+        if (!$book->update($request->all())) {
             return json()->internalError('Failed to update !');
         }
 
@@ -128,14 +130,14 @@ class BooksController extends Controller
      * Remove the specified resource from storage.
      *
      * @param BooksRequest $request
-     * @param  int          $id
+     * @param  int $id
      * @return \Illuminate\Contracts\Http\Response
      */
     public function destroy(BooksRequest $request, $id)
     {
         $book = $this->model->findOrFail($id);
 
-        if (! $book->delete()) {
+        if (!$book->delete()) {
             return json()->internalError('Failed to delete !');
         }
 

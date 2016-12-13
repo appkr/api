@@ -17,16 +17,15 @@ class LinkController extends Controller
     {
         $payload = [
             'resources' => route('v1.books.index'),
-            'authors'   => route('v1.authors.index'),
+            'authors' => route('v1.authors.index'),
         ];
 
         return $response->setMeta([
-            'message'       => "Hello, I'm a appkr/api example",
-            'version'       => 1,
+            'message' => "Hello, I'm a appkr/api example",
+            'version' => 1,
             'documentation' => route('v1.doc'),
-        ])
-            ->respond([
-                'link' => $payload,
-            ]);
+        ])->respond([
+            'link' => $payload,
+        ]);
     }
 }

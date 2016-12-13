@@ -36,6 +36,18 @@ if (! function_exists('is_50')) {
     }
 }
 
+if (! function_exists('is_51')) {
+    /**
+     * Determine if the current version of framework is based on 5.1.*
+     *
+     * @return bool
+     */
+    function is_51()
+    {
+        return str_contains(app()->version(), '5.1');
+    }
+}
+
 if (! function_exists('is_52')) {
     /**
      * Determine if the current version of framework is based on 5.2.*

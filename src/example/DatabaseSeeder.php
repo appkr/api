@@ -2,9 +2,10 @@
 
 namespace Appkr\Api\Example;
 
+use DB;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,7 +16,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        if (! is_52()) {
+        $sqlite = in_array(config('database.default'), ['sqlite', 'testing'], true);
+
+        if (! $sqlite) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        }
+
+        if (is_50() or is_51()) {
             Eloquent::unguard();
         }
 
@@ -26,7 +33,7 @@ class DatabaseSeeder extends Seeder
 
         foreach (range(1, 10) as $index) {
             Author::create([
-                'name'  => $faker->userName,
+                'name' => $faker->userName,
                 'email' => $faker->safeEmail,
             ]);
         }
@@ -37,22 +44,26 @@ class DatabaseSeeder extends Seeder
         Book::truncate();
 
         $authorIds = (is_50())
-            ? Author::lists('id')
-            : Author::lists('id')->toArray();
+            ? Author::pluck('id')
+            : Author::pluck('id')->toArray();
 
         foreach (range(1, 100) as $index) {
             Book::create([
-                'title'       => $faker->sentence(),
-                'author_id'   => $faker->randomElement($authorIds),
-                'published_at'=> $faker->dateTimeThisCentury,
+                'title' => $faker->sentence(),
+                'author_id' => $faker->randomElement($authorIds),
+                'published_at' => $faker->dateTimeThisCentury,
                 'description' => $faker->randomElement([$faker->paragraph(), null]),
-                'out_of_print'=> $faker->randomElement([0, 1]),
-                'created_at'  => $faker->dateTimeThisYear,
+                'out_of_print' => $faker->randomElement([true, false]),
+                'created_at' => $faker->dateTimeThisYear,
             ]);
         }
 
-        if (! is_52()) {
+        if (is_50() or is_51()) {
             Eloquent::regard();
+        }
+
+        if (! $sqlite) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }
 
         $this->command->line("<info>Seeded:</info> books table");

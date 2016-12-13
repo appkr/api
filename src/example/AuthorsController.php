@@ -19,7 +19,7 @@ class AuthorsController extends Controller
     {
         $this->model = $model;
         $this->meta = [
-            'version'       => 1,
+            'version' => 1,
             'documentation' => route('v1.doc'),
         ];
     }

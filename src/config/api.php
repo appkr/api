@@ -23,7 +23,7 @@ return [
     */
     'endpoint' => [
         'pattern' => 'v1/*',
-        'domain'  => env('API_DOMAIN', 'api.example.com'),
+        'domain' => env('API_DOMAIN', 'api.example.com'),
     ],
 
     /*
@@ -51,20 +51,6 @@ return [
             'limit' => [3, 0], // [limit, offset]
             'sort' => ['created_at', 'desc'], // [sortKey, sortDirection]
         ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Partial response
-    |--------------------------------------------------------------------------
-    |
-    | API clients are allowed to select the response format using query string.
-    | This will help saving network bandwidth..
-    | e.g. /author?fields=id,title,link&include=books:fields(id|title|published_at)
-    |
-    */
-    'partial' => [
-        'key' => 'fields',
     ],
 
     /*
@@ -101,7 +87,9 @@ return [
     | Default response headers that every resource/simple response should includes
     |
     */
-    'defaultHeaders' => ['X-Powered-By' => 'appkr/api'],
+    'defaultHeaders' => [
+        // 'foo' => 'bar'
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -124,9 +112,9 @@ return [
     */
     'successFormat' => [
         'success' => [
-            'code'    => ':code',
+            'code' => ':code',
             'message' => ':message',
-        ]
+        ],
     ],
 
     /*
@@ -138,11 +126,11 @@ return [
     | respondWithError(), respondForbidden()... consumes this format
     |
     */
-    'errorFormat' =>  [
+    'errorFormat' => [
         'error' => [
-            'code'    => ':code',
+            'code' => ':code',
             'message' => ':message',
-        ]
-    ]
+        ],
+    ],
 
 ];

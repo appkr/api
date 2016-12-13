@@ -36,17 +36,17 @@ class BookApiTestForLumen extends \TestCase
         $faker = \Faker\Factory::create();
 
         $this->author = \Appkr\Api\Example\Author::create([
-            'name'  => 'foo',
+            'name' => 'foo',
             'email' => $faker->safeEmail,
         ]);
 
         $this->books = \Appkr\Api\Example\Book::create([
-            'title'       => $faker->sentence(),
-            'author_id'   => $this->author->id,
-            'published_at'=> $faker->dateTimeThisCentury,
+            'title' => $faker->sentence(),
+            'author_id' => $this->author->id,
+            'published_at' => $faker->dateTimeThisCentury,
             'description' => $faker->randomElement([$faker->paragraph(), null]),
-            'out_of_print'=> $faker->randomElement([0, 1]),
-            'created_at'  => $faker->dateTimeThisYear,
+            'out_of_print' => $faker->randomElement([0, 1]),
+            'created_at' => $faker->dateTimeThisYear,
         ])->toArray();
     }
 
@@ -77,8 +77,8 @@ class BookApiTestForLumen extends \TestCase
     public function it_responds_422_if_create_book_request_fails_validation()
     {
         $payload = [
-            'title'       => null,
-            'author_id'   => null,
+            'title' => null,
+            'author_id' => null,
             'description' => 'n',
         ];
 
@@ -91,8 +91,8 @@ class BookApiTestForLumen extends \TestCase
     public function it_responds_201_after_creation()
     {
         $payload = [
-            'title'       => 'new title',
-            'author_id'   => $this->author->id,
+            'title' => 'new title',
+            'author_id' => $this->author->id,
             'description' => 'new description',
         ];
 
@@ -141,7 +141,7 @@ class BookApiTestForLumen extends \TestCase
     {
         return [
             'HTTP_Authorization' => "Bearer {$this->jwtToken}",
-            'HTTP_Accept'        => 'application/json',
+            'HTTP_Accept' => 'application/json',
         ] + $append;
     }
 }
