@@ -267,6 +267,8 @@ class BookTransformer extends TransformerAbstract
                  'href' => route('api.v1.books.show', $book->id),
             ],
         ];
+        
+        return $this->buildPayload($payload);
     }
 
     /**
@@ -545,6 +547,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 [MIT ](https://raw.githubusercontent.com/appkr/api/master/LICENSE) 라이선스. 이슈와 PR은 언제든 환영한다.
 
 ## 11. 변경 이력
+
+### v2.1.0
+
+- 응답으로 내 보낼 필드를 필터링하기 위해 `TransformerAbstract::buildPayload` 메서드 추가 (기존에 만든 트랜스포머 그대로 사용 가능).
+- Artisan 명령으로 생성하는 트랜스포머 템플릿 변경 (기존에 만든 트랜스포머 그대로 사용 가능).
 
 ### v2.0.0
 

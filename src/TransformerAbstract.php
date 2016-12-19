@@ -213,6 +213,30 @@ abstract class TransformerAbstract extends FractalTransformer
         return $this;
     }
 
+    /* END OF SETTERS */
+
+    /**
+     * Filter fields to respond.
+     *
+     * @param array $payload
+     * @return array
+     */
+    public function buildPayload(array $payload)
+    {
+        if ($visible = $this->getVisible()) {
+            $payload = array_only($payload, $visible);
+        }
+
+        if ($hidden = $this->getHidden()) {
+            $payload = array_except($payload, $hidden);
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Set class properties by request query string.
+     */
     protected function setProperties()
     {
         // Fetch request query string values passed by an API client.

@@ -11,6 +11,19 @@ class {{ $subject->transformer }} extends TransformerAbstract
     @if($includes->count() > 0)
         @include('api::partial.property')
     @endif
+    /**
+     * List of attributes to respond.
+     *
+     * @var array
+     */
+    protected $visible = [];
+
+    /**
+     * List of attributes NOT to respond.
+     *
+     * @var array
+     */
+    protected $hidden = [];
 
     /**
      * Transform single resource.
@@ -30,11 +43,7 @@ class {{ $subject->transformer }} extends TransformerAbstract
             ],
         ];
 
-        if ($fields = $this->getFields()) {
-            $payload = array_only($payload, $fields);
-        }
-
-        return $payload;
+        return $this->buildPayload($payload);
     }
 
     @forelse($includes as $include)

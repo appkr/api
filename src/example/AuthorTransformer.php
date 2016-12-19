@@ -24,6 +24,20 @@ class AuthorTransformer extends TransformerAbstract
     protected $defaultIncludes = [];
 
     /**
+     * List of attributes to respond.
+     *
+     * @var array
+     */
+    protected $visible = [];
+
+    /**
+     * List of attributes NOT to respond.
+     *
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
      * Transform single resource.
      *
      * @param \Appkr\Api\Example\Author $author
@@ -46,11 +60,7 @@ class AuthorTransformer extends TransformerAbstract
             'books' => (int) $author->books->count(),
         ];
 
-        if ($fields = $this->getFields()) {
-            $payload = array_only($payload, $fields);
-        }
-
-        return $payload;
+        return $this->buildPayload($payload);
     }
 
     /**

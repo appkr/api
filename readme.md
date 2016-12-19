@@ -268,6 +268,8 @@ class BookTransformer extends TransformerAbstract
                  'href' => route('api.v1.books.show', $book->id),
             ],
         ];
+        
+        return $this->buildPayload($payload);
     }
     
     /**
@@ -555,6 +557,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 [MIT License](https://raw.githubusercontent.com/appkr/api/master/LICENSE). Issues and PRs are always welcomed.
 
 ## 11. CHANGELOG
+
+### v2.1.0
+
+- `TransformerAbstract::buildPayload` method added to filter the list of response fields (Backward compatible).
+- Artisan generated transformer template changed (Backward compatible).
 
 ### v2.0.0
 
