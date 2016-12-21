@@ -548,6 +548,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. 변경 이력
 
+### v2.2.0
+
+- JSON 응답의 키를 스네이크 또는 카멜 케이스로 변경하는 기능 추가 (`config('api.convert.key')`).
+- JSON 응답의 날짜 형식을 변경하는 기능 추가 (`config('api.convert.date')`).
+
 ### v2.1.0
 
 - 응답으로 내 보낼 필드를 필터링하기 위해 `TransformerAbstract::buildPayload` 메서드 추가 (기존에 만든 트랜스포머 그대로 사용 가능).

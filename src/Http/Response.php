@@ -3,6 +3,7 @@
 namespace Appkr\Api\Http;
 
 use Appkr\Api\Transformers\SimpleArrayTransformer;
+use Appkr\Api\Support\PayloadConverter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -74,6 +75,10 @@ class Response
                 $payload,
                 ['meta' => $meta]
             );
+        }
+
+        if (config('api.convert')) {
+            $payload = PayloadConverter::run($payload);
         }
 
         $statusCode = (config('api.suppress_response_code') === true)

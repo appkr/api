@@ -133,4 +133,21 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Response Formatting
+    |--------------------------------------------------------------------------
+    |
+    | Convert field key and date value value. Set these to null if you want to
+    | control the response body manually in transformer.
+    |
+    | Available value for key: null or 'camel_case' or 'snake_case'
+    | Available value for date: null or
+    |   @see http://php.net/manual/en/class.datetime.php#datetime.constants.types
+    |
+    */
+    'convert' => [
+        'key' => 'snake_case',
+        'date' => DATE_ISO8601
+    ],
 ];

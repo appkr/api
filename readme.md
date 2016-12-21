@@ -558,6 +558,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. CHANGELOG
 
+### v2.2.0
+
+- Field name converting to snake or camel case depending on configuration (`config('api.convert.key')`).
+- Date format converting depending on configuration (`config('api.convert.date')`).
+
 ### v2.1.0
 
 - `TransformerAbstract::buildPayload` method added to filter the list of response fields (Backward compatible).
