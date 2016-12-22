@@ -1,8 +1,8 @@
 # RESTful HTTP API component for Laravel or Lumen based project
 
-[![Latest Stable Version](https://poser.pugx.org/appkr/api/v/stable)](https://packagist.org/packages/appkr/api) 
-[![Total Downloads](https://poser.pugx.org/appkr/api/downloads)](https://packagist.org/packages/appkr/api) 
-[![Latest Unstable Version](https://poser.pugx.org/appkr/api/v/unstable)](https://packagist.org/packages/appkr/api) 
+[![Latest Stable Version](https://poser.pugx.org/appkr/api/v/stable)](https://packagist.org/packages/appkr/api)
+[![Total Downloads](https://poser.pugx.org/appkr/api/downloads)](https://packagist.org/packages/appkr/api)
+[![Latest Unstable Version](https://poser.pugx.org/appkr/api/v/unstable)](https://packagist.org/packages/appkr/api)
 [![License](https://poser.pugx.org/appkr/api/license)](https://packagist.org/packages/appkr/api)
 
 **[한국어 매뉴얼](readme_ko.md)**
@@ -177,7 +177,7 @@ $app->register(Appkr\Api\ApiServiceProvider::class);
 $ php artisan vendor:publish --provider="Appkr\Api\ApiServiceProvider"
 ```
 
-The configuration file is located at `config/api.php`. 
+The configuration file is located at `config/api.php`.
 
 In Lumen we can manually create `config/api.php` file, and then activate the configuration at `bootstrap/app.php` like the following.
 
@@ -200,7 +200,7 @@ Skim through the [`config/api.php`](https://github.com/appkr/api/blob/master/src
 
 ### 6.1. What?
 
-For more about what the transformer is, what you can do with this, and why it is required, [see this page](http://fractal.thephpleague.com/transformers/). 1 transformer for 1 model is a best practice(e.g. `BookTransformer` for `Book` model). 
+For more about what the transformer is, what you can do with this, and why it is required, [see this page](http://fractal.thephpleague.com/transformers/). 1 transformer for 1 model is a best practice(e.g. `BookTransformer` for `Book` model).
 
 ### 6.2. Transformer Boilerplate Generator
 
@@ -213,13 +213,13 @@ $ php artisan make:transformer {subject} {--includes=}
 
 -   `subject`_ The string name of the model class.
 
--   `includes`_ Sub-resources that is related to the subject model. By providing this option, your API client can have control over the response body. see [NESTING SUB RESOURCES](#nesting) section. 
+-   `includes`_ Sub-resources that is related to the subject model. By providing this option, your API client can have control over the response body. see [NESTING SUB RESOURCES](#nesting) section.
 
-    The option's signature is `--include=Model,eloquent_relationship_methods[,isCollection]`. 
-    
+    The option's signature is `--include=Model,eloquent_relationship_methods[,isCollection]`.
+
     If the include-able sub-resource is a type of collection, like `Book` and `Comment` relationship in the example, we provide `true` as the third value of the option.
 
-> **`Note`** 
+> **`Note`**
 >
 > We should always use double back slashes (`\\`), when passing a namespace in artisan command WITHOUT quotation marks.
 >
@@ -247,10 +247,10 @@ class BookTransformer extends TransformerAbstract
      * @var  array
      */
     protected $availableIncludes = [
-        'author', 
+        'author',
         'comments'
     ];
-    
+
     /**
      * Transform single resource.
      *
@@ -268,10 +268,10 @@ class BookTransformer extends TransformerAbstract
                  'href' => route('api.v1.books.show', $book->id),
             ],
         ];
-        
+
         return $this->buildPayload($payload);
     }
-    
+
     /**
      * Include author.
      * This method is used, when an API client request /v1/books?include=author
@@ -283,11 +283,11 @@ class BookTransformer extends TransformerAbstract
     public function includeAuthor(Book $book, ParamBag $params = null)
     {
         return $this->item(
-            $book->author, 
+            $book->author,
             new \App\Transformers\UserTransformer($params)
         );
     }
-    
+
     /**
      * Include comments.
      * This method is used, when an API client request /v1/books??include=comments
@@ -346,7 +346,7 @@ The following is the full list of response methods that `Appkr\Api\Http\Response
 ```php
 <?php
 
-// Generic response. 
+// Generic response.
 // If valid callback parameter is provided, jsonp response can be provided.
 // This is a very base method. All other responses are utilizing this.
 respond(array $payload);
@@ -355,22 +355,22 @@ respond(array $payload);
 // If $transformer is not given as the second argument,
 // this class does its best to transform the payload to a simple array
 withCollection(
-    \Illuminate\Database\Eloquent\Collection $collection, 
-    \League\Fractal\TransformerAbstract|null $transformer, 
+    \Illuminate\Database\Eloquent\Collection $collection,
+    \League\Fractal\TransformerAbstract|null $transformer,
     string|null $resourceKey // for JsonApiSerializer only
 );
 
 // Respond single item
 withItem(
-    \Illuminate\Database\Eloquent\Model $model, 
-    \League\Fractal\TransformerAbstract|null $transformer, 
+    \Illuminate\Database\Eloquent\Model $model,
+    \League\Fractal\TransformerAbstract|null $transformer,
     string|null $resourceKey // for JsonApiSerializer only
 );
 
 // Respond collection of resources with pagination
 withPagination(
-    \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator, 
-    \League\Fractal\TransformerAbstract|null $transformer, 
+    \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator,
+    \League\Fractal\TransformerAbstract|null $transformer,
     string|null $resourceKey // for JsonApiSerializer only
 );
 
@@ -444,10 +444,10 @@ setMeta(array $meta);
 
 // We can apply this method against an instantiated transformer,
 // to get the parsed query parameters that belongs only to the current resource.
-// 
+//
 // e.g. GET /v1/author?include[]=books:limit(2|0)&include[]=comments:sort(id|asc)
 //      $transformer = new BookTransformer;
-//      $transformer->get(); 
+//      $transformer->get();
 // Will produce all parsed parameters:
 //      // [
 //      //     'limit'  => 2 // if not given default value at config
@@ -455,7 +455,7 @@ setMeta(array $meta);
 //      //     'sort'   => 'created_at' // if given, given value
 //      //     'order'  => 'desc' // if given, given value
 //      // ]
-// Alternatively we can pass a key. 
+// Alternatively we can pass a key.
 //      $transformer->get('limit');
 // Will produce limit parameter:
 //      // 2
@@ -548,8 +548,8 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLaravel.php
 $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 ```
 
-> **`Note`** 
-> 
+> **`Note`**
+>
 > If you finished evaluating the example, don't forget to rollback the migration and re-comment the unnecessary lines at `ApiServiceProvider`.
 
 ## 10. LICENSE & CONTRIBUTION
@@ -557,6 +557,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 [MIT License](https://raw.githubusercontent.com/appkr/api/master/LICENSE). Issues and PRs are always welcomed.
 
 ## 11. CHANGELOG
+
+### v2.3.0
+
+- `withCollection()` now accepts `Illuminate\Support\Collection`.
+- Fix bug at `SimpleArrayTransformer`.
 
 ### v2.2.0
 

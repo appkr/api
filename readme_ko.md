@@ -1,8 +1,8 @@
 # RESTful HTTP API 컴포넌트 (라라벨/루멘用)
 
-[![최신 배포 버전](https://poser.pugx.org/appkr/api/v/stable)](https://packagist.org/packages/appkr/api) 
-[![다운로드](https://poser.pugx.org/appkr/api/downloads)](https://packagist.org/packages/appkr/api) 
-[![최신 개발 버전](https://poser.pugx.org/appkr/api/v/unstable)](https://packagist.org/packages/appkr/api) 
+[![최신 배포 버전](https://poser.pugx.org/appkr/api/v/stable)](https://packagist.org/packages/appkr/api)
+[![다운로드](https://poser.pugx.org/appkr/api/downloads)](https://packagist.org/packages/appkr/api)
+[![최신 개발 버전](https://poser.pugx.org/appkr/api/v/unstable)](https://packagist.org/packages/appkr/api)
 [![라이선스](https://poser.pugx.org/appkr/api/license)](https://packagist.org/packages/appkr/api)
 
 ## INDEX
@@ -23,7 +23,7 @@
 <a name="about"></a>
 ## 1. 개요
 
-라라벨, 루멘 프레임워크로 RESTful API 서비스를 만들 때 필요한 기능들을 엮어서 만든 초경량 컴포넌트다. 
+라라벨, 루멘 프레임워크로 RESTful API 서비스를 만들 때 필요한 기능들을 엮어서 만든 초경량 컴포넌트다.
 
 <a name="goal"></a>
 ## 2. 특징
@@ -53,7 +53,7 @@ Route::group(['prefix' => 'v1'], function () {
 });
 ```
 
-루멘은 RESTful 리소스 라우트가 없다. 직접 하나씩 써야 한다. 
+루멘은 RESTful 리소스 라우트가 없다. 직접 하나씩 써야 한다.
 
 ```php
 <?php // app/Http/routes.php OR routes/web.php OR routes/api.php
@@ -201,7 +201,7 @@ $app->configure('api');
 
 트랜스포머가 뭐하는 것인지, 왜 필요한지를 공부하려면 [`league/fractal` 공식 문서](http://fractal.thephpleague.com/transformers/)를 참고하라.
 
-모델당 트랜스포머가 하나씩 있어야 한다(예: `Book` 모델에 대응되는 `BookTransformer`). 
+모델당 트랜스포머가 하나씩 있어야 한다(예: `Book` 모델에 대응되는 `BookTransformer`).
 
 ### 6.2. 뼈대 코드 생성 명령
 
@@ -217,7 +217,7 @@ $ php artisan make:transformer {subject} {--includes=}
 -   `includes`_ 모델과 관계를 가진 다른 모델
 
     `--includes=모델,관계_메서드[,컬렉션]` 형식으로 쓴다. 세번째 인자인 컬렉션을 `true`로 지정하면, 해당 관계를 컬렉션으로 인식한다. 우리 예제에서는 `Book`과 `Comment`는 일대다(one to many), `Book`과 `Author`는 일대일(one to one) 관계를 가진다고 가정했다.
-     
+
 > **중요**
 >
 > 콘솔에서 따옴표 없이 역슬래시(`\`)를 쓸 때는 이중 역슬래시(`\\`)로 써야 한다.
@@ -246,10 +246,10 @@ class BookTransformer extends TransformerAbstract
      * @var  array
      */
     protected $availableIncludes = [
-        'author', 
+        'author',
         'comments',
     ];
-    
+
     /**
      * Transform single resource.
      *
@@ -267,7 +267,7 @@ class BookTransformer extends TransformerAbstract
                  'href' => route('api.v1.books.show', $book->id),
             ],
         ];
-        
+
         return $this->buildPayload($payload);
     }
 
@@ -282,11 +282,11 @@ class BookTransformer extends TransformerAbstract
     public function includeAuthor(Book $book, ParamBag $params = null)
     {
         return $this->item(
-            $book->author, 
+            $book->author,
             new \App\Transformers\UserTransformer($params)
         );
     }
-    
+
     /**
      * Include comments.
      * This method is used, when an API client request /v1/books??include=comments
@@ -313,7 +313,7 @@ class BookTransformer extends TransformerAbstract
 <a name="nesting"></a>
 ## 7. 하위 리소스 포함
 
-클라이언트가 현재 요청하는 리소스에 대한 응답에 포함할 하위 리소스를 지정할 수 있다. 다음 URL 요청은 `/author` 엔드포인트로 저자 정보를 요청하는데, 저자의 책 목록을 id 내림차순으로 정렬했을 때, 0개를 건너뛰고 총 3개의 정보도 같이 받겠다는 의미다.    
+클라이언트가 현재 요청하는 리소스에 대한 응답에 포함할 하위 리소스를 지정할 수 있다. 다음 URL 요청은 `/author` 엔드포인트로 저자 정보를 요청하는데, 저자의 책 목록을 id 내림차순으로 정렬했을 때, 0개를 건너뛰고 총 3개의 정보도 같이 받겠다는 의미다.
 
 ```HTTP
 GET /authors?include=books:limit(3|0):sort(id|desc)
@@ -345,29 +345,29 @@ GET /books?include=author,publisher.somethingelse
 ```php
 <?php
 
-// JSON을 응답한다. 
+// JSON을 응답한다.
 // 이 클래스의 모든 메서드가 이 메서드를 사용하여 최종 JSON 응답을 반환한다.
 respond(array $payload);
 
 // 리소스 컬렉션을 트랜스폼하고 JSON 형식으로 응답한다.
 // 두번 째 인자($transformer)가 없으면 일반 배열로 트랜스폼한다.
 withCollection(
-    \Illuminate\Database\Eloquent\Collection $collection, 
-    \League\Fractal\TransformerAbstract|null $transformer, 
+    \Illuminate\Database\Eloquent\Collection $collection,
+    \League\Fractal\TransformerAbstract|null $transformer,
     string|null $resourceKey // for JsonApiSerializer only
 );
 
 // 리소스 인스턴스를 트랜스폼하고 JSON 형식으로 응답한다.
 withItem(
-    \Illuminate\Database\Eloquent\Model $model, 
-    \League\Fractal\TransformerAbstract|null $transformer, 
+    \Illuminate\Database\Eloquent\Model $model,
+    \League\Fractal\TransformerAbstract|null $transformer,
     string|null $resourceKey // for JsonApiSerializer only
 );
 
 // 페이지네이터 컬렉션을 트랜스폼하고 JSON 형식으로 응답한다.
 withPagination(
-    \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator, 
-    \League\Fractal\TransformerAbstract|null $transformer, 
+    \Illuminate\Contracts\Pagination\LengthAwarePaginator $paginator,
+    \League\Fractal\TransformerAbstract|null $transformer,
     string|null $resourceKey // for JsonApiSerializer only
 );
 
@@ -431,15 +431,15 @@ setMeta(array $meta);
 ### 8.2. `Appkr\Api\TransformerAbstract` 메서드
 
 ```php
-<?php 
+<?php
 
 // 트랜스포머가 해석한 URL 쿼리 파라미터의 값을 얻을 수 있다.
-// 예제는 BookTransformer의 코드이므로, books 리소스에 대한 쿼리 파라미터만 취급한다. 
-// 
+// 예제는 BookTransformer의 코드이므로, books 리소스에 대한 쿼리 파라미터만 취급한다.
+//
 // e.g. GET /v1/author?include[]=books:limit(2|0)&include[]=comments:sort(id|asc)
 //      $transformer = new BookTransformer;
-//      $transformer->get(); 
-// 
+//      $transformer->get();
+//
 //      // [
 //      //     'limit'  => 2
 //      //     'offset' => 0
@@ -447,9 +447,9 @@ setMeta(array $meta);
 //      //     'order'  => 'desc'
 //      // ]
 //
-// get() 메서드 안에 쿼리 필드 이름을 넣어서 하나의 값만 얻을 수도 있다. 
+// get() 메서드 안에 쿼리 필드 이름을 넣어서 하나의 값만 얻을 수도 있다.
 //      $transformer->get('limit');
-// 
+//
 //      // 2
 get(string|null $key)
 
@@ -460,7 +460,7 @@ getParsedParams(string|null $key)
 ### 8.3. `helpers.php`
 
 ```php
-<?php 
+<?php
 
 // 인자를 넘기면 JSON 응답을 만든다.
 // 인자가 없으면 Appkr\Api\Http\Response 인스턴스를 반환한다.
@@ -538,8 +538,8 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLaravel.php
 $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 ```
 
-> **`중요`** 
-> 
+> **`중요`**
+>
 > 테스트가 끝났으면 1단계에서 풀었던 주석을 다시 살려둔다.
 
 ## 10. 라이선스와 기여
@@ -547,6 +547,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 [MIT ](https://raw.githubusercontent.com/appkr/api/master/LICENSE) 라이선스. 이슈와 PR은 언제든 환영한다.
 
 ## 11. 변경 이력
+
+### v2.3.0
+
+- `withCollection()` 메서드의 인자로 `Illuminate\Support\Collection` 사용 가능.
+- `SimpleArrayTransformer`의 버그 수정.
 
 ### v2.2.0
 
@@ -565,5 +570,5 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ### v1.1.0 [buggy]
 
-- 응답 필드 선택을 편리하게 하기 위해서 필드 그룹핑 기능 추가. 
+- 응답 필드 선택을 편리하게 하기 위해서 필드 그룹핑 기능 추가.
 - API 클라이언트가 제출한 파라미터 또는 값이 정확하지 않을 경우 `UnexpectedValueException`을 발생시킨다(기존에는 `Exception`).

@@ -2,8 +2,8 @@
 
 namespace Appkr\Api\Transformers;
 
-use Illuminate\Database\Eloquent;
-use League\Fractal;
+use Illuminate\Support\Collection;
+use JsonSerializable;
 use League\Fractal\TransformerAbstract;
 
 class SimpleArrayTransformer extends TransformerAbstract
@@ -11,16 +11,28 @@ class SimpleArrayTransformer extends TransformerAbstract
     /**
      * Transform single resource
      *
-     * @param $model
+     * @param Collection|array $model
      * @return array
      * @throws \Exception
      */
     public function transform($model)
     {
-        if (! $model instanceof Collection::class) {
-            throw new \Exception('Expecting an instance of \Illuminate\Database\Eloquent\Collection, ' . get_class($model) . ' given.');
+        if (is_array($model)) {
+            return $model;
         }
 
-        return $model->toArray();
+        if ($model instanceof Collection) {
+            return $model->toArray();
+        }
+
+        if ($model instanceof JsonSerializable) {
+            return $model->jsonSerialize();
+        }
+
+        throw new \Exception(
+            'Expecting an instance of \Illuminate\Support\Collection, '
+            . get_class($model)
+            . ' given.'
+        );
     }
 }
