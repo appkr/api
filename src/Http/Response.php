@@ -104,12 +104,12 @@ class Response
     /**
      * Respond collection of resources.
      *
-     * @param IlluminateCollection $collection
+     * @param IlluminateCollection|array $collection
      * @param null $transformer
      * @param string|null $resourceKey
      * @return \Illuminate\Contracts\Http\Response
      */
-    public function withCollection(IlluminateCollection $collection, $transformer = null, $resourceKey = null)
+    public function withCollection($collection, $transformer = null, $resourceKey = null)
     {
         return $this->respond(
             $this->getCollection($collection, $transformer, $resourceKey)
@@ -119,12 +119,12 @@ class Response
     /**
      * Create FractalCollection payload.
      *
-     * @param IlluminateCollection $collection
+     * @param IlluminateCollection|array $collection
      * @param null $transformer
      * @param string|null $resourceKey
      * @return mixed
      */
-    public function getCollection(IlluminateCollection $collection, $transformer = null, $resourceKey = null)
+    public function getCollection($collection, $transformer = null, $resourceKey = null)
     {
         $resource = new FractalCollection(
             $collection,
