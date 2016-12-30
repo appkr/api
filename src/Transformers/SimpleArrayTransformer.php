@@ -29,6 +29,10 @@ class SimpleArrayTransformer extends TransformerAbstract
             return $model->jsonSerialize();
         }
 
+        if ($model instanceof \stdClass) {
+            return (array) $model;
+        }
+
         throw new \Exception(
             'Expecting an instance of \Illuminate\Support\Collection, '
             . get_class($model)
