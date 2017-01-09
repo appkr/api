@@ -558,6 +558,10 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. CHANGELOG
 
+### v2.3.3
+
+- `Appkr\Api\Http\UnexpectedIncludesParamException` will be thrown instead of `UnexpectedValueException` when includes query params are not valid. 
+
 ### v2.3.0
 
 - `withCollection()` now accepts `Illuminate\Support\Collection`.

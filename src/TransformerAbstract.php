@@ -4,7 +4,7 @@ namespace Appkr\Api;
 
 use League\Fractal\ParamBag;
 use League\Fractal\TransformerAbstract as FractalTransformer;
-use UnexpectedValueException;
+use Appkr\Api\Http\UnexpectedIncludesParamException;
 
 abstract class TransformerAbstract extends FractalTransformer
 {
@@ -256,7 +256,7 @@ abstract class TransformerAbstract extends FractalTransformer
      * We already define the white lists in the config.
      *
      * @return bool
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedIncludesParamException
      */
     protected function validateIncludeParams()
     {
@@ -265,7 +265,7 @@ abstract class TransformerAbstract extends FractalTransformer
 
         if ($invalidParams = array_diff($usedParams, $validParams)) {
             // This validates query string KEY passed by an API client.
-            throw new UnexpectedValueException(
+            throw new UnexpectedIncludesParamException(
                 sprintf(
                     'Used param(s): "%s". Valid param(s): "%s"',
                     implode(',', $usedParams),
@@ -313,7 +313,7 @@ abstract class TransformerAbstract extends FractalTransformer
         }
 
         if (! empty($errors)) {
-            throw new UnexpectedValueException(implode(PHP_EOL, $errors));
+            throw new UnexpectedIncludesParamException(implode(PHP_EOL, $errors));
         }
 
         return true;
