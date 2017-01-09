@@ -73,11 +73,14 @@ return [
     | Fractal Serializer
     |--------------------------------------------------------------------------
     |
-    | Refer to
+    | for 'serializer' refer to
     | http://fractal.thephpleague.com/serializers/
+    | for 'jsonEncodeOption' refer to
+    | http://php.net/manual/kr/json.constants.php
     |
     */
     'serializer' => \League\Fractal\Serializer\ArraySerializer::class,
+    'jsonEncodeOption' => 0,
 
     /*
     |--------------------------------------------------------------------------

@@ -548,6 +548,10 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. 변경 이력
 
+### v2.3.4
+
+- `jsonEncodeOption` 설정 추가.
+
 ### v2.3.3
 
 - includes 쿼리 파리미터 값이 유효하지 않을 때 `UnexpectedValueException` 대신 `Appkr\Api\Http\UnexpectedIncludesParamException` 발생함. 
