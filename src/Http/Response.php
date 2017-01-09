@@ -89,7 +89,7 @@ class Response
                 $payload,
                 $statusCode,
                 $this->getHeaders(),
-                JSON_PRETTY_PRINT
+                config('api.jsonEncodeOption')
             )
             : $this->response->jsonp(
                 $callback,
