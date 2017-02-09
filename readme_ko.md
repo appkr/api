@@ -580,3 +580,9 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 - 응답 필드 선택을 편리하게 하기 위해서 필드 그룹핑 기능 추가.
 - API 클라이언트가 제출한 파라미터 또는 값이 정확하지 않을 경우 `UnexpectedValueException`을 발생시킨다(기존에는 `Exception`).
+
+## 12. 스폰서
+
+- [JetBrains](https://www.jetbrains.com/)사에서 phpStorm IDE를 지원해 주셨습니다.
+
+![](https://github.com/appkr/l5essential/raw/master/icon_PhpStorm.png)

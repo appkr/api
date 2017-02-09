@@ -590,3 +590,9 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 - Field grouping feature added for partial response conveniences.
 - `TransformerAbstract` now throws `UnexpectedValueException` instead of `Exception`, when params or values passed by API client are not acceptable.
+
+## 12. SPONSORS
+
+- Thanks [JetBrains](https://www.jetbrains.com/) for supporting phpStorm IDE.
+
+![](https://github.com/appkr/l5essential/raw/master/icon_PhpStorm.png)
