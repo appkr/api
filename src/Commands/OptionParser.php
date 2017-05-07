@@ -65,13 +65,6 @@ class OptionParser
         }
 
         $fqcn = array_shift($segments);
-
-        //        if (! class_exists($fqcn)) {
-        //            throw new \Exception(
-        //                'Not existing Model - ' . $fqcn
-        //            );
-        //        }
-
         $relationship = array_shift($segments);
         $type = in_array(array_shift($segments), ['yes', 'y', 'true', true, '1', 1])
             ? 'collection' : 'item';

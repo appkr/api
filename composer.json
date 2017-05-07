@@ -15,13 +15,11 @@
   ],
   "require": {
     "php": ">=5.5.9",
-    "league/fractal": "0.14.*",
-    "shrikeh/teapot": "1.0.*"
+    "league/fractal": "0.16.*",
+    "shrikeh/teapot": "2.3.*"
   },
   "require-dev": {
-    "fzaninotto/faker": "~1.5",
-    "phpunit/phpunit": "~5.2",
-    "illuminate/console": "~5.0"
+    "phpunit/phpunit": "6.1.*"
   },
   "autoload": {
     "psr-4": {
@@ -38,11 +36,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.0.x-dev"
+      "dev-master": "2.0.x-dev"
     }
-  },
-  "suggest": {
-    "barryvdh/laravel-cors": "Handle CORS issue",
-    "tymon/jwt-auth": "Protect your API with JSON Web Tokens"
   }
 }

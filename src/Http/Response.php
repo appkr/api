@@ -209,7 +209,7 @@ class Response
         $queryParams = array_diff_key($_GET, array_flip(['page']));
 
         foreach ($queryParams as $key => $value) {
-            $paginator->addQuery($key, $value);
+            $paginator->appends($key, $value);
         }
 
         $collection = $paginator->getCollection();
@@ -425,7 +425,6 @@ class Response
      */
     public function tooManyRequestsError($message = 'Too Many Requests')
     {
-        // Todo TOO_MANY_REQUESTS no linked in \Teapot\StatusCode
         return $this->setStatusCode(429)->error($message);
     }
 
@@ -542,13 +541,11 @@ class Response
             ':code' => $this->getStatusCode(),
         ];
 
-        array_walk_recursive(
-            $format, function (&$value, $key) use ($replace) {
+        array_walk_recursive($format, function (&$value, $key) use ($replace) {
             if (isset($replace[$value])) {
                 $value = $replace[$value];
             }
-        }
-        );
+        });
 
         return $format;
     }

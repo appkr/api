@@ -558,6 +558,11 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. CHANGELOG
 
+### v3.0.0
+
+- API not changed.
+- Update `league/fractal` version to 0.16.0
+
 ### v2.3.4
 
 - `jsonEncodeOption` config added. 
