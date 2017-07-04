@@ -14,7 +14,6 @@
     }
   ],
   "require": {
-    "php": ">=5.5.9",
     "league/fractal": "0.16.*",
     "shrikeh/teapot": "2.3.*"
   },
@@ -37,6 +36,11 @@
   "extra": {
     "branch-alias": {
       "dev-master": "2.0.x-dev"
+    },
+    "laravel": {
+      "providers": [
+        "\\Appkr\\Api\\ApiServiceProvider"
+      ]
     }
   }
 }

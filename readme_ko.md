@@ -548,6 +548,10 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. 변경 이력
 
+### v3.0.1
+
+- 라라벨 5.5의 패키지 자동 인식 지원 (config/app.php에 서비스프로바이더 등록 불필요) 
+
 ### v3.0.0
 
 - API 변경 없음(하위 버전 호환)

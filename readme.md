@@ -558,6 +558,10 @@ $ vendor/bin/phpunit vendor/appkr/api/src/example/BookApiTestForLumen.php
 
 ## 11. CHANGELOG
 
+### v3.0.1
+
+- Supports auto package discovery in Laravel 5.5 (No need to add ServiceProvider in config/app.php)
+
 ### v3.0.0
 
 - API not changed.
