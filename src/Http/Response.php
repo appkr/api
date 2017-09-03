@@ -35,7 +35,7 @@ class Response
     /**
      * @var integer Http status code
      */
-    protected $statusCode = StatusCode::OK;
+    protected $statusCode = 200;
 
     /**
      * @var array Http response headers
