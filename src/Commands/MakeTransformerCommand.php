@@ -68,7 +68,7 @@ class MakeTransformerCommand extends Command
      *
      * @return bool|null
      */
-    public function fire()
+    public function handle()
     {
         $this->subject = (new ArgumentConverter)->convert($this->argument('subject'));
         $this->includes = (new OptionParser)->parse($this->option('includes'));
