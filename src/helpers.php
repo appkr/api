@@ -1,5 +1,40 @@
 <?php
 
+if (! function_exists('snake_case')) {
+    function snake_case($string)
+    {
+        return \Illuminate\Support\Str::snake($string);
+    }
+}
+
+if (! function_exists('str_contains')) {
+    function str_contains($string)
+    {
+        return \Illuminate\Support\Str::contains($string);
+    }
+}
+
+if (! function_exists('str_singular')) {
+    function str_singular($string)
+    {
+        return \Illuminate\Support\Str::singular($string);
+    }
+}
+
+if (! function_exists('str_plural')) {
+    function str_plural($string)
+    {
+        return \Illuminate\Support\Str::plural($string);
+    }
+}
+
+if (! function_exists('starts_with')) {
+    function starts_with($string)
+    {
+        return \Illuminate\Support\Str::startsWith($string);
+    }
+}
+
 if (! function_exists('is_laravel')) {
     /**
      * Determine the current framework is Laravel

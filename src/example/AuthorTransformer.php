@@ -50,13 +50,13 @@ class AuthorTransformer extends TransformerAbstract
             'name' => $author->name,
             'email' => $author->email,
             'created_at' => $author->created_at->toIso8601String(),
-            'link' => [
-                'rel' => 'self',
-                'href' => route('v1.authors.show', [
-                    'id' => $author->id,
-                    'include' => 'books',
-                ]),
-            ],
+//            'link' => [
+//                'rel' => 'self',
+//                'href' => route('v1.authors.show', [
+//                    'id' => $author->id,
+//                    'include' => 'books',
+//                ]),
+//            ],
             'books' => (int) $author->books->count(),
         ];
 
