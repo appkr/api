@@ -51,15 +51,15 @@ class BookTransformer extends TransformerAbstract
             'description' => $book->description,
             'out_of_print' => (bool) $book->out_of_print == 1,
             'published_yr' => property_exists($book, 'published_at') ? $book->published_at->format('Y') : 'unknown',
-            'link' => [
-                'rel' => 'self',
-                'href' => route(
-                    'v1.books.show', [
-                    'id' => $book->id,
-                    'include' => 'author',
-                ]
-                ),
-            ],
+//            'link' => [
+//                'rel' => 'self',
+//                'href' => route(
+//                    'v1.books.show', [
+//                    'id' => $book->id,
+//                    'include' => 'author',
+//                ]
+//                ),
+//            ],
             'author' => $book->author->name,
         ];
 
